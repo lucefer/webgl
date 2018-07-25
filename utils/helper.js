@@ -13,3 +13,20 @@ function createProgram(gl,vertexShader,fragmentShader){
 	gl.useProgram(program);
 	return program;
 }
+function getModel(){
+	if(window.glModel){
+		return window.glModel
+	}else {
+		window.glModel = {};
+		return window.glModel
+	}
+}
+function getUniforms(gl,index){
+	let cache = getModel()[index];
+	if(!cache){
+		var uniform =  gl.getUniformLocation(gl.program, "u_FragColor");
+		getModel()[index] = uniform;
+		cache = uniform;
+	}
+	return cache;
+}
