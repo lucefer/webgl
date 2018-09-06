@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>从一个点开始</title>
+	<link rel = "stylesheet" href="../css/common.css" />
+</head>
+<body>
+	<canvas id="canvas"></canvas>
+	<script type="shader-source" id="vertexShader">
+		void main(){
+			gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+			gl_PointSize = 20.0;
+		}
+	</script>
+	<script type="shader-source" id="fragmentShader">
+		void main(){
+			gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+		}
+	</script>
+	<script src="../utils/webgl-helper.js"></script>
+	<script>
+		let canvas = getCanvas('canvas');
+		resizeCanvas(canvas);
+		let gl = getContext(canvas);
+		let vertexShader = createShaderFromScript(gl, gl.VERTEX_SHADER, 'vertexShader');
+		let fragmentShader = createShaderFromScript(gl, gl.FRAGMENT_SHADER, 'fragmentShader');
+		let program = createProgram(gl, vertexShader, fragmentShader);
+		gl.useProgram(program);
+		gl.clearColor(0,0,0,1.0);
+		gl.clear(gl.COLOR_BUFFER_BIT);
+		gl.drawArrays(gl.POINTS, 0, 1);
+	</script>
+</body>
+</html>
