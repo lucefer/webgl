@@ -53,4 +53,19 @@ function createProgram(gl, vertexShader, fragmentShader) {
     console.error(gl.getProgramInfoLog(program));
     gl.deleteProgram(program);
 }
+function createProgramFromScript(gl, vertexScriptId, fragmentScriptId){
+	let vertexShader = createShaderFromScript(gl, gl.VERTEX_SHADER, vertexScriptId);
+	let fragmentShader = createShaderFromScript(gl, gl.FRAGMENT_SHADER, fragmentScriptId)
+	let program = createProgram(gl, vertexShader, fragmentShader);
+	return program;
+}
+
+function createBuffer(gl, attribute, vertexAttribPointer){
+	let {size, type, normalize, stride, offset}  = vertexAttribPointer
+	gl.enableVertexAttribArray(attribute);
+	let buffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+	gl.vertexAttribPointer(attribute, size, type || gl.FLOAT, normalize || false, stride || 0, offset || 0);
+	return buffer;
+}
 
