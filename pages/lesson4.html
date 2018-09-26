@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>绘制三角形</title>
+	<title>单个 buffer 绘制渐变三角形</title>
 	<link rel = "stylesheet" href="../css/common.css" />
 </head>
 <body>
@@ -14,6 +14,8 @@
 		attribute vec2 a_Position;
 		// 接收canvas的尺寸。
 		attribute vec2 a_Screen_Size;
+		attribute vec4 a_Color;
+		varying vec4 v_Color;
 		void main(){
 			// 将 canvas 的坐标值 转换为 [-1.0, 1.0]的范围。
 			vec2 position = (a_Position / a_Screen_Size) * 2.0 - 1.0;
@@ -21,18 +23,18 @@
 			position = position * vec2(1.0, -1.0);
 			// 最终的顶点坐标。
 			gl_Position = vec4(position, 0.0, 1.0);
-			// 点的大小。
-			gl_PointSize = 10.0;
+			v_Color = a_Color;
 		}
 	</script>
 	<script type="shader-source" id="fragmentShader">
 		//浮点数设置为中等精度
 		precision mediump float;
 		//全局变量，用来接收 JavaScript传递过来的颜色。
-		uniform vec4 u_Color;
+		varying vec4 v_Color;
+
 		void main(){
 			// 将颜色处理成 GLSL 允许的范围[0， 1]。
-			vec4 color = u_Color / vec4(255, 255, 255, 1);
+			vec4 color = v_Color / vec4(255, 255, 255, 1);
 			// 点的最终颜色。
 			gl_FragColor = color;
 		}
@@ -54,58 +56,47 @@
 		resizeCanvas(canvas);
 		//获取绘图上下文
 		let gl = getContext(canvas);
-		//创建定点着色器
-		let vertexShader = createShaderFromScript(gl, gl.VERTEX_SHADER, 'vertexShader');
-		//创建片元着色器
-		let fragmentShader = createShaderFromScript(gl, gl.FRAGMENT_SHADER, 'fragmentShader');
 		//创建着色器程序
-		let program = createProgram(gl, vertexShader, fragmentShader);
+		let program = createProgramFromScript(gl, 'vertexShader', 'fragmentShader');
 		//使用该着色器程序
 		gl.useProgram(program);
-		//设置清屏颜色为黑色。
+
+		
+		let a_Screen_Size = gl.getAttribLocation(program, 'a_Screen_Size');
+		gl.vertexAttrib2f(a_Screen_Size, canvas.width, canvas.height);
+
+		let positions = [];
 
 		let a_Position = gl.getAttribLocation(program, 'a_Position');
-		let a_Screen_Size = gl.getAttribLocation(program, 'a_Screen_Size');
-		let u_Color = gl.getUniformLocation(program, 'u_Color');
-
-		gl.vertexAttrib2f(a_Screen_Size, canvas.width, canvas.height);
-		let positions = [];
+		let a_Color = gl.getAttribLocation(program, 'a_Color');
+		gl.enableVertexAttribArray(a_Position);
+		gl.enableVertexAttribArray(a_Color);
 
 		let buffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-
-		gl.enableVertexAttribArray(a_Position);
-		//一个顶点信息包含两个数据。
-		let size = 2;
-		//顶点信息的数据类型为 浮点型。
-		let type = gl.FLOAT;
-		//我们自己在着色器中进行的归一化处理，所以此处设置为false
-		let normalize = false;
-		//步长为默认值 0 ，即按照 size*type的值。
-		let stride = 0;
-		//顶点信息从 buffer 中取数据时的偏移值。
-		let offset = 0;
-
-		// 顶点如何从 buffer 中取数据。
-		gl.vertexAttribPointer(a_Position, size, type,normalize, stride, offset);
+		gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 24, 0);
+		gl.vertexAttribPointer(a_Color, 4, gl.FLOAT, false, 24, 8);
+		
+		//设置清屏颜色为黑色。
+		gl.clearColor(0, 0, 0, 1);
 
 		canvas.addEventListener("click", e=>{
 			positions.push(e.pageX, e.pageY);
-			// 顶点信息为6个数据即3个顶点时执行绘制操作，因为三角形由三个顶点组成。
-			if(positions.length % 6 == 0) {
+			let color = randomColor();
+			positions.push(color.r, color.g, color.b, color.a);
+			// 顶点信息为 18 的整数倍即3个顶点时执行绘制操作，因为三角形由三个顶点组成，每个顶点由六个元素组成。
+			if(positions.length % 18 == 0) {
+				gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 				gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-				let color = randomColor();
-				gl.uniform4f(u_Color, color.r, color.g, color.b, color.a);
+				
 				render(gl);
 			}
 		})
-		gl.clearColor(0, 0, 0, 1);
 		function render(gl){
 			gl.clear(gl.COLOR_BUFFER_BIT);
 			let primitiveType = gl.TRIANGLES;
-			let drawOffset = 0;
-			if(positions.length >0){
-				gl.drawArrays(primitiveType, drawOffset, positions.length / 2);
+			if(positions.length > 0){
+				gl.drawArrays(primitiveType, 0, positions.length / 6);
 			}
 		}
 		render(gl);
