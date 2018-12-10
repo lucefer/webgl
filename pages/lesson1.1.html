@@ -39,6 +39,7 @@
 	</script>
 	<script src="../utils/webgl-helper.js"></script>
 	<script>
+<<<<<<< HEAD
 		const random = Math.random;
 		function randomColor(){
 			return  {
@@ -50,6 +51,11 @@
 		}
 		//获取canvas
 		let canvas = getCanvas('canvas');
+=======
+		
+		//获取canvas
+		let canvas = getCanvas('#canvas');
+>>>>>>> 2e148774649198103a2a37df46b9061e02e3e28e
 		//设置canvas尺寸为满屏
 		resizeCanvas(canvas);
 		//获取绘图上下文
@@ -101,7 +107,11 @@
 		//设置屏幕清除颜色为黑色。
 		gl.clearColor(0,0,0,1.0);
 		//绘制
+<<<<<<< HEAD
 		render();
+=======
+		render(gl);
+>>>>>>> 2e148774649198103a2a37df46b9061e02e3e28e
 	</script>
 </body>
 </html>
