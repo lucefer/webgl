@@ -1,6 +1,18 @@
-function $$(id) {
-    if (!id) return null;
-    return document.getElementById(id);
+const random = Math.random;
+function randomColor(){
+	return  {
+		r: random() * 255,
+		g: random() * 255,
+		b: random() * 255,
+		a: random() * 1
+	}
+}
+function $$(str) {
+    if (!str) return null;
+    if(str.startsWith('#')){
+    	return document.querySelector(str);
+    }
+    return document.querySelectorAll(str);
 }
 
 function getCanvas(id) {
@@ -15,9 +27,11 @@ function resizeCanvas(canvas, width, height) {
         canvas.height = height ? height: window.innerHeight;
     }
 }
+
 function getContext(canvas){
 	return canvas.getContext('webgl') ||  canvas.getContext('experimental-webgl');
 }
+
 function createShader(gl, type, source) {
     let shader = gl.createShader(type);
     gl.shaderSource(shader, source);
@@ -30,13 +44,15 @@ function createShader(gl, type, source) {
     console.error(gl.getShaderInfoLog(shader));
     gl.deleteShader(shader);
 }
+
 function createShaderFromScript(gl, type, scriptId){
-	let sourceScript = $$(scriptId);
+	let sourceScript = $$('#' + scriptId);
 	if(!sourceScript){
 		return null;
 	}
 	return createShader(gl, type, sourceScript.innerHTML);
 }
+
 function createProgram(gl, vertexShader, fragmentShader) {
     if(!vertexShader || !fragmentShader){
     	console.warn('着色器不能为空')
@@ -53,6 +69,7 @@ function createProgram(gl, vertexShader, fragmentShader) {
     console.error(gl.getProgramInfoLog(program));
     gl.deleteProgram(program);
 }
+
 function createProgramFromScript(gl, vertexScriptId, fragmentScriptId){
 	let vertexShader = createShaderFromScript(gl, gl.VERTEX_SHADER, vertexScriptId);
 	let fragmentShader = createShaderFromScript(gl, gl.FRAGMENT_SHADER, fragmentScriptId)
