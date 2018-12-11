@@ -88,7 +88,7 @@ function createBuffer(gl, attribute, vertexAttribPointer){
 function createProgramFromScript(gl, vertexScriptId, fragmentScriptId){
 	let vertexShader = createShaderFromScript(gl, gl.VERTEX_SHADER, vertexScriptId);
 	let fragmentShader = createShaderFromScript(gl, gl.FRAGMENT_SHADER, fragmentScriptId)
-	let program = createProgram(gl, vertexShader, fragmentShader);
+	let program = createSimpleProgram(gl, vertexShader, fragmentShader);
 	return program;
 }
 

@@ -39,23 +39,9 @@
 	</script>
 	<script src="../utils/webgl-helper.js"></script>
 	<script>
-<<<<<<< HEAD
-		const random = Math.random;
-		function randomColor(){
-			return  {
-				r: random() * 255,
-				g: random() * 255,
-				b: random() * 255,
-				a: random() * 1
-			}
-		}
-		//获取canvas
-		let canvas = getCanvas('canvas');
-=======
 		
 		//获取canvas
 		let canvas = getCanvas('#canvas');
->>>>>>> 2e148774649198103a2a37df46b9061e02e3e28e
 		//设置canvas尺寸为满屏
 		resizeCanvas(canvas);
 		//获取绘图上下文
@@ -65,7 +51,7 @@
 		//创建片元着色器
 		let fragmentShader = createShaderFromScript(gl, gl.FRAGMENT_SHADER, 'fragmentShader');
 		//创建着色器程序
-		let program = createProgram(gl, vertexShader, fragmentShader);
+		let program = createSimpleProgram(gl, vertexShader, fragmentShader);
 		//使用该着色器程序
 		gl.useProgram(program);
 		//设置清屏颜色为黑色。

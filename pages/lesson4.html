@@ -49,7 +49,7 @@
 		//获取绘图上下文
 		let gl = getContext(canvas);
 		//创建着色器程序
-		let program = createProgramFromScript(gl, 'vertexShader', 'fragmentShader');
+		let program = createSimpleProgramFromScript(gl, 'vertexShader', 'fragmentShader');
 		//使用该着色器程序
 		gl.useProgram(program);
 

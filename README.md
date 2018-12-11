@@ -13,11 +13,7 @@
 	* [源码](https://github.com/lucefer/webgl/blob/master/pages/lesson1.1.html)
 * [初级入门：绘制线段](http://ifanqi.top/webgl/pages/lesson5.html)
 	* [源码](https://github.com/lucefer/webgl/blob/master/pages/lesson5.html)
-<<<<<<< HEAD
-* [初级入门：绘制三角形 : pages/lesson2.html](https://ifanqi.top/webgl/pages/lesson2.html)
-=======
 * [初级入门：绘制三角形 : pages/lesson2.html](http://ifanqi.top/webgl/pages/lesson2.html)
->>>>>>> f96ef6c7d42fa44fe4d2fec5dd72d532bb9b6d00
 	* [源码](https://github.com/lucefer/webgl/blob/master/pages/lesson2.html)
 * [初级入门：绘制渐变三角形(多缓冲) : pages/lesson3.html](http://ifanqi.top/webgl/pages/lesson3.html)
 	* [源码](https://github.com/lucefer/webgl/blob/master/pages/lesson3.html)
