@@ -1,45 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-	<meta charset="UTF-8">
-	<title>从一个点开始</title>
-	<link rel = "stylesheet" href="../css/common.css" />
+    <meta charset="UTF-8">
+    <title>从一个点开始</title>
+    <link rel="stylesheet" href="../css/common.css" />
 </head>
+
 <body>
-	<canvas id="canvas"></canvas>
-	<script type="shader-source" id="vertexShader">
-		void main(){
+    <canvas id="canvas"></canvas>
+    <script type="shader-source" id="vertexShader">
+        void main(){
 			gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
 			gl_PointSize = 10.0;
 		}
 	</script>
-	<script type="shader-source" id="fragmentShader">
-		void main(){
+    <script type="shader-source" id="fragmentShader">
+        void main(){
 			gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 		}
 	</script>
-	<script src="../utils/webgl-helper.js"></script>
-	<script>
-		//获取canvas
-		let canvas = getCanvas('#canvas');
-		//设置canvas尺寸为满屏
-		resizeCanvas(canvas);
-		//获取绘图上下文
-		let gl = getContext(canvas);
-		//创建定点着色器
-		let vertexShader = createShaderFromScript(gl, gl.VERTEX_SHADER, 'vertexShader');
-		//创建片元着色器
-		let fragmentShader = createShaderFromScript(gl, gl.FRAGMENT_SHADER, 'fragmentShader');
-		//创建着色器程序
-		let program = createProgram(gl, vertexShader, fragmentShader);
-		//使用该着色器程序
-		gl.useProgram(program);
-		//设置清屏颜色为黑色。
-		gl.clearColor(0,0,0,1.0);
-		//清屏
-		gl.clear(gl.COLOR_BUFFER_BIT);
-		//绘制一个点。
-		gl.drawArrays(gl.POINTS, 0, 1);
-	</script>
+    <script src="../utils/webgl-helper.js"></script>
+    <script>
+    //获取canvas
+    let canvas = getCanvas('#canvas');
+    //设置canvas尺寸为满屏
+    resizeCanvas(canvas);
+    //获取绘图上下文
+    let gl = getContext(canvas);
+    //创建定点着色器
+    let vertexShader = createShaderFromScript(gl, gl.VERTEX_SHADER, 'vertexShader');
+    //创建片元着色器
+    let fragmentShader = createShaderFromScript(gl, gl.FRAGMENT_SHADER, 'fragmentShader');
+    //创建着色器程序
+    let program = createSimpleProgram(gl, vertexShader, fragmentShader);
+    //使用该着色器程序
+    gl.useProgram(program);
+    //设置清屏颜色为黑色。
+    gl.clearColor(0, 0, 0, 1.0);
+    //清屏
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    //绘制一个点。
+    gl.drawArrays(gl.POINTS, 0, 1);
+    </script>
 </body>
+
 </html>

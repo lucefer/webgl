@@ -53,7 +53,7 @@ function createShaderFromScript(gl, type, scriptId){
 	return createShader(gl, type, sourceScript.innerHTML);
 }
 
-function createProgram(gl, vertexShader, fragmentShader) {
+function createSimpleProgram(gl, vertexShader, fragmentShader) {
     if(!vertexShader || !fragmentShader){
     	console.warn('着色器不能为空')
     	return;
@@ -69,10 +69,10 @@ function createProgram(gl, vertexShader, fragmentShader) {
     console.error(gl.getProgramInfoLog(program));
     gl.deleteProgram(program);
 }
-function createProgramFromScript(gl, vertexScriptId, fragmentScriptId){
+function createSimpleProgramFromScript(gl, vertexScriptId, fragmentScriptId){
 	let vertexShader = createShaderFromScript(gl, gl.VERTEX_SHADER, vertexScriptId);
 	let fragmentShader = createShaderFromScript(gl, gl.FRAGMENT_SHADER, fragmentScriptId)
-	let program = createProgram(gl, vertexShader, fragmentShader);
+	let program = createSimpleProgram(gl, vertexShader, fragmentShader);
 	return program;
 }
 
