@@ -53,7 +53,7 @@ function createShaderFromScript(gl, type, scriptId){
 	return createShader(gl, type, sourceScript.innerHTML);
 }
 
-function createProgram(gl, vertexShader, fragmentShader) {
+function createSimpleProgram(gl, vertexShader, fragmentShader) {
     if(!vertexShader || !fragmentShader){
     	console.warn('着色器不能为空')
     	return;
@@ -68,6 +68,21 @@ function createProgram(gl, vertexShader, fragmentShader) {
     }
     console.error(gl.getProgramInfoLog(program));
     gl.deleteProgram(program);
+}
+function createSimpleProgramFromScript(gl, vertexScriptId, fragmentScriptId){
+	let vertexShader = createShaderFromScript(gl, gl.VERTEX_SHADER, vertexScriptId);
+	let fragmentShader = createShaderFromScript(gl, gl.FRAGMENT_SHADER, fragmentScriptId)
+	let program = createSimpleProgram(gl, vertexShader, fragmentShader);
+	return program;
+}
+
+function createBuffer(gl, attribute, vertexAttribPointer){
+	let {size, type, normalize, stride, offset}  = vertexAttribPointer
+	gl.enableVertexAttribArray(attribute);
+	let buffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+	gl.vertexAttribPointer(attribute, size, type || gl.FLOAT, normalize || false, stride || 0, offset || 0);
+	return buffer;
 }
 
 function createProgramFromScript(gl, vertexScriptId, fragmentScriptId){

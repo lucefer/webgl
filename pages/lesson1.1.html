@@ -51,7 +51,7 @@
 		//创建片元着色器
 		let fragmentShader = createShaderFromScript(gl, gl.FRAGMENT_SHADER, 'fragmentShader');
 		//创建着色器程序
-		let program = createProgram(gl, vertexShader, fragmentShader);
+		let program = createSimpleProgram(gl, vertexShader, fragmentShader);
 		//使用该着色器程序
 		gl.useProgram(program);
 
