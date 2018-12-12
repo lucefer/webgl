@@ -25,7 +25,7 @@
 	* [源码](https://github.com/lucefer/webgl/blob/master/pages/lesson7.html)
 * [初级入门：利用三角带绘制正方形 : pages/lesson8.html](http://ifanqi.top/webgl/pages/lesson8.html)
 	* [源码](https://github.com/lucefer/webgl/blob/master/pages/lesson8.html)
-* [初级入门：利用三角带绘制正方形 : pages/lesson9.html](http://ifanqi.top/webgl/pages/lesson9.html)
+* [初级入门：利用三角扇绘制正方形 : pages/lesson9.html](http://ifanqi.top/webgl/pages/lesson9.html)
 	* [源码](https://github.com/lucefer/webgl/blob/master/pages/lesson9.html)
 * [初级入门：利用三角带绘制正方形 : pages/lesson10.html](http://ifanqi.top/webgl/pages/lesson10.html)
 	* [源码](https://github.com/lucefer/webgl/blob/master/pages/lesson10.html)
