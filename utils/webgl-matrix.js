@@ -12,6 +12,7 @@ function identity(target) {
             target[i] = 0;
         }
     }
+    return target;
 }
 
 
@@ -190,9 +191,9 @@ function rotationY(angle, target) {
     target[3] = 0;
     target[4] = 0;
     target[5] = 1;
-    target[6] = sin;
+    target[6] = 0;
     target[7] = 0;
-    target[8] = s;
+    target[8] = sin;
     target[9] = 0;
     target[10] = cos;
     target[11] = 0;

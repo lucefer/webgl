@@ -155,6 +155,35 @@ Vector3.subtractVectors = function(vec1, vec2){
 }
 
 /**
+ *向量逐分量相乘
+ *
+ * @param {*} vec1
+ * @param {*} vec2
+ */
+Vector3.prototype.multiplyVectors = function(vec1, vec2){
+	this.x = vec1.x * vec2.x;
+	this.y = vec1.y * vec2.y;
+	this.z = vec1.z * vec2.z;
+	return this; 
+}
+
+/**
+ *向量逐分量相乘
+ *
+ * @param {*} vec1
+ * @param {*} vec2
+ */
+Vector3.prototype.multiply = function(vec1, vec2){
+	if(vec2){
+		return this.multiplyVectors(vec1, vec2);
+	}
+	this.x *= vec1.x;
+	this.y *= vec1.y;
+	this.z *= vec1.z;
+	return this;
+}
+
+/**
  *向量点积
  *
  * @param {*} vec1

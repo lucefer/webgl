@@ -101,3 +101,6 @@ function createBuffer(gl, attribute, vertexAttribPointer){
 	return buffer;
 }
 
+function deg2radians(deg){
+	return Math.PI * deg / 180 ;
+}
