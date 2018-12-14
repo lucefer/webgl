@@ -121,7 +121,7 @@
         gl.clearColor(0, 0, 0, 1);
         gl.enable(gl.CULL_FACE);
         var aspect = canvas.width / canvas.height;
-        var projectionMatrix = matrix.ortho(aspect * 10, -aspect * 10, -10,10, 100, -100);
+        var projectionMatrix = matrix.ortho(aspect * 4, -aspect * 4, -4, 4, 100, -100);
 
         /*渲染*/
         function render() {
