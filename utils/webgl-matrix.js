@@ -104,16 +104,16 @@ function multiply(next, prev, target) {
     target[7] = p01 * n30 + p11 * n31 + p21 * n32 + p31 * n33;
     
     //第三列
-    target[0] = p02 * n00 + p12 * n01 + p22 * n02 + p32 * n03;
-    target[1] = p02 * n10 + p12 * n11 + p22 * n12 + p32 * n13;
-    target[2] = p02 * n20 + p12 * n21 + p22 * n22 + p32 * n23;
-    target[3] = p02 * n30 + p12 * n31 + p22 * n32 + p32 * n33;
+    target[8] = p02 * n00 + p12 * n01 + p22 * n02 + p32 * n03;
+    target[9] = p02 * n10 + p12 * n11 + p22 * n12 + p32 * n13;
+    target[10] = p02 * n20 + p12 * n21 + p22 * n22 + p32 * n23;
+    target[11] = p02 * n30 + p12 * n31 + p22 * n32 + p32 * n33;
     
     //第四列
-    target[0] = p03 * n00 + p13 * n01 + p23 * n02 + p33 * n03;
-    target[1] = p03 * n10 + p13 * n11 + p23 * n12 + p33 * n13;
-    target[2] = p03 * n20 + p13 * n21 + p23 * n22 + p33 * n23;
-    target[3] = p03 * n30 + p13 * n31 + p23 * n32 + p33 * n33;
+    target[12] = p03 * n00 + p13 * n01 + p23 * n02 + p33 * n03;
+    target[13] = p03 * n10 + p13 * n11 + p23 * n12 + p33 * n13;
+    target[14] = p03 * n20 + p13 * n21 + p23 * n22 + p33 * n23;
+    target[15] = p03 * n30 + p13 * n31 + p23 * n32 + p33 * n33;
 
     return target;
 
