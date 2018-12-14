@@ -119,8 +119,11 @@
 
         //设置清屏颜色为黑色。
         gl.clearColor(0, 0, 0, 1);
+        //隐藏背面
         gl.enable(gl.CULL_FACE);
+        
         var aspect = canvas.width / canvas.height;
+        //计算正交投影矩阵
         var projectionMatrix = matrix.ortho(aspect * 4, -aspect * 4, -4, 4, 100, -100);
 
         /*渲染*/
@@ -131,16 +134,17 @@
 
             xAngle +=1;
             yAngle +=1;
-            
-            dstMatrix = matrix.rotationY(deg2radians(yAngle), dstMatrix);
-            dstMatrix = matrix.multiply(dstMatrix, matrix.rotationX(deg2radians(xAngle), tmpMatrix), dstMatrix);
-            
-            dstMatrix = matrix.multiply(projectionMatrix, dstMatrix, dstMatrix);
+            //先绕 Y 轴旋转矩阵。
+            matrix.rotationY(deg2radians(yAngle), dstMatrix);
+            //再绕 X 轴旋转
+            matrix.multiply(dstMatrix, matrix.rotationX(deg2radians(xAngle), tmpMatrix), dstMatrix);
+            //模型投影矩阵。
+            matrix.multiply(projectionMatrix, dstMatrix, dstMatrix);
 
             gl.uniformMatrix4fv(u_Matrix, false, dstMatrix);
-            console.log(dstMatrix)
             gl.clear(gl.COLOR_BUFFER_BIT);
             gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+            
             requestAnimationFrame(render);
         }
         render();
@@ -152,9 +156,7 @@
         var tmpMatrix = matrix.identity();
         document.body.addEventListener('click',function(){
             playing = !playing;
-           
-            render();
-            
+            render();  
         })
     </script>
 </body>
