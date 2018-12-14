@@ -46,26 +46,74 @@ function initialize(source, target) {
  * @returns
  */
 function multiply(next, prev, target) {
-    target = target || new Float32Array();
-    target[0] = prev[0] * next[0] + prev[1] * next[4] + prev[2] * next[8] + prev[3] * next[12];
-    target[1] = prev[0] * next[1] + prev[1] * next[5] + prev[2] * next[9] + prev[3] * next[13];
-    target[2] = prev[0] * next[2] + prev[1] * next[6] + prev[2] * next[10] + prev[3] * next[14];
-    target[3] = prev[0] * next[3] + prev[1] * next[7] + prev[2] * next[11] + prev[3] * next[15];
-
-    target[4] = prev[4] * next[0] + prev[5] * next[4] + prev[6] * next[8] + prev[7] * next[12];
-    target[5] = prev[4] * next[1] + prev[5] * next[5] + prev[6] * next[9] + prev[7] * next[13];
-    target[6] = prev[4] * next[2] + prev[5] * next[6] + prev[6] * next[10] + prev[7] * next[14];
-    target[7] = prev[4] * next[3] + prev[5] * next[7] + prev[6] * next[11] + prev[7] * next[15];
-
-    target[8] = prev[8] * next[0] + prev[9] * next[4] + prev[10] * next[8] + prev[11] * next[12];
-    target[9] = prev[8] * next[1] + prev[9] * next[5] + prev[10] * next[9] + prev[11] * next[13];
-    target[10] = prev[8] * next[2] + prev[9] * next[6] + prev[10] * next[10] + prev[11] * next[14];
-    target[11] = prev[8] * next[3] + prev[9] * next[7] + prev[10] * next[11] + prev[11] * next[15];
-
-    target[12] = prev[12] * next[0] + prev[13] * next[4] + prev[14] * next[8] + prev[15] * next[12];
-    target[13] = prev[12] * next[1] + prev[13] * next[5] + prev[14] * next[9] + prev[15] * next[13];
-    target[14] = prev[12] * next[2] + prev[13] * next[6] + prev[14] * next[10] + prev[15] * next[14];
-    target[15] = prev[12] * next[3] + prev[13] * next[7] + prev[14] * next[11] + prev[15] * next[15];
+    target = target || new Float32Array(16);
+    //第一列
+    var p00 = prev[0];
+    var p10 = prev[1];
+    var p20 = prev[2];
+    var p30 = prev[3];
+    //第二列
+    var p01 = prev[4];
+    var p11 = prev[5];
+    var p21 = prev[6];
+    var p31 = prev[7];
+    //第三列
+    var p02 = prev[8];
+    var p12 = prev[9];
+    var p22 = prev[10];
+    var p32 = prev[11];
+    //第四列
+    var p03 = prev[12];
+    var p13 = prev[13];
+    var p23 = prev[14];
+    var p33 = prev[15];
+    
+    //第一行
+    var n00 = next[0];
+    var n01 = next[4];
+    var n02 = next[8];
+    var n03 = next[12];
+    //第二行
+    var n10 = next[1];
+    var n11 = next[5];
+    var n12 = next[9];
+    var n13 = next[13];
+    
+    //第三行
+    var n20 = next[2];
+    var n21 = next[6];
+    var n22 = next[10];
+    var n23 = next[14];
+    
+    //第四行
+    var n30 = next[3];
+    var n31 = next[7];
+    var n32 = next[11];
+    var n33 = next[15];
+    
+    //第一列
+    target[0] = p00 * n00 + p10 * n01 + p20 * n02 + p30 * n03;
+    target[1] = p00 * n10 + p10 * n11 + p20 * n12 + p30 * n13;
+    target[2] = p00 * n20 + p10 * n21 + p20 * n22 + p30 * n23;
+    target[3] = p00 * n30 + p10 * n31 + p20 * n32 + p30 * n33;
+    
+    //第二列
+    target[4] = p01 * n00 + p11 * n01 + p21 * n02 + p31 * n03;
+    target[5] = p01 * n10 + p11 * n11 + p21 * n12 + p31 * n13;
+    target[6] = p01 * n20 + p11 * n21 + p21 * n22 + p31 * n23;
+    target[7] = p01 * n30 + p11 * n31 + p21 * n32 + p31 * n33;
+    
+    //第三列
+    target[0] = p02 * n00 + p12 * n01 + p22 * n02 + p32 * n03;
+    target[1] = p02 * n10 + p12 * n11 + p22 * n12 + p32 * n13;
+    target[2] = p02 * n20 + p12 * n21 + p22 * n22 + p32 * n23;
+    target[3] = p02 * n30 + p12 * n31 + p22 * n32 + p32 * n33;
+    
+    //第四列
+    target[0] = p03 * n00 + p13 * n01 + p23 * n02 + p33 * n03;
+    target[1] = p03 * n10 + p13 * n11 + p23 * n12 + p33 * n13;
+    target[2] = p03 * n20 + p13 * n21 + p23 * n22 + p33 * n23;
+    target[3] = p03 * n30 + p13 * n31 + p23 * n32 + p33 * n33;
 
     return target;
 
