@@ -63,9 +63,9 @@ function multiply(next, prev, target) {
     target[11] = prev[8] * next[3] + prev[9] * next[7] + prev[10] * next[11] + prev[11] * next[15];
 
     target[12] = prev[12] * next[0] + prev[13] * next[4] + prev[14] * next[8] + prev[15] * next[12];
-    target[9] = prev[12] * next[1] + prev[13] * next[5] + prev[14] * next[9] + prev[15] * next[13];
-    target[10] = prev[12] * next[2] + prev[13] * next[6] + prev[14] * next[10] + prev[15] * next[14];
-    target[11] = prev[12] * next[3] + prev[13] * next[7] + prev[14] * next[11] + prev[15] * next[15];
+    target[13] = prev[12] * next[1] + prev[13] * next[5] + prev[14] * next[9] + prev[15] * next[13];
+    target[14] = prev[12] * next[2] + prev[13] * next[6] + prev[14] * next[10] + prev[15] * next[14];
+    target[15] = prev[12] * next[3] + prev[13] * next[7] + prev[14] * next[11] + prev[15] * next[15];
 
     return target;
 
