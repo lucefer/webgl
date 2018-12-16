@@ -84,6 +84,7 @@
       // 找到着色器中的全局变量 u_Color;
       var u_Texture = gl.getUniformLocation(program, "u_Texture");
       var u_Screen_Size = gl.getUniformLocation(program, "u_Screen_Size");
+      gl.uniform2f(u_Screen_Size, canvas.width, canvas.height);
       var a_Position = gl.getAttribLocation(program, "a_Position");
       var a_Uv = gl.getAttribLocation(program, "a_Uv");
 
