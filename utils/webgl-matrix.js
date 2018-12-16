@@ -5,7 +5,7 @@
  */
 function identity(target) {
     target = target || new Float32Array(16);
-    for (let i = 0; i < 16; i++) {
+    for (var i = 0; i < 16; i++) {
         if (i % 5 == 0) {
             target[i] = 1;
         } else {
@@ -26,7 +26,7 @@ function identity(target) {
 function initialize(source, target) {
     if (source) {
         if (target) {
-            for (let i = 0; i < 16; i++) {
+            for (var i = 0; i < 16; i++) {
                 target[i] = source[i];
             }
             return target;
@@ -81,7 +81,7 @@ function multiply(next, prev, target) {
  */
 function translation(tx, ty, tz, target) {
     target = target || new Float32Array(16);
-    for (let i = 0; i < 12; i++) {
+    for (var i = 0; i < 12; i++) {
         if (i % 5 == 0) {
             target[i] = 1;
         } else {
