@@ -157,25 +157,25 @@ function translate(m, tx, ty, tz, target) {
     target = target || new Float32Array(16);
 
     //第一列
-    let m0 = m[0];
-    let m1 = m[1];
-    let m2 = m[2];
-    let m3 = m[3];
+    var m0 = m[0];
+    var m1 = m[1];
+    var m2 = m[2];
+    var m3 = m[3];
 
     //第二列
-    let m4 = m[4];
-    let m5 = m[5];
-    let m6 = m[6];
-    let m7 = m[7];
+    var m4 = m[4];
+    var m5 = m[5];
+    var m6 = m[6];
+    var m7 = m[7];
 
     //第三列
-    let m8 = m[8];
-    let m9 = m[9];
-    let m10 = m[10];
-    let m11 = m[11];
+    var m8 = m[8];
+    var m9 = m[9];
+    var m10 = m[10];
+    var m11 = m[11];
 
     if (m !== target) {
-        for (let i = 0; i < 12; i++) {
+        for (var i = 0; i < 12; i++) {
             target[i] = m[i]
         }
     }
@@ -198,8 +198,8 @@ function translate(m, tx, ty, tz, target) {
  */
 function rotationX(angle, target) {
     target = target || new Float32Array(16);
-    let sin = Math.sin(angle);
-    let cos = Math.cos(angle);
+    var sin = Math.sin(angle);
+    var cos = Math.cos(angle);
 
     target[0] = 1;
     target[1] = 0;
@@ -230,8 +230,8 @@ function rotationX(angle, target) {
  */
 function rotationY(angle, target) {
     target = target || new Float32Array(16);
-    let sin = Math.sin(angle);
-    let cos = Math.cos(angle);
+    var sin = Math.sin(angle);
+    var cos = Math.cos(angle);
 
     target[0] = cos;
     target[1] = 0;
@@ -262,8 +262,8 @@ function rotationY(angle, target) {
  */
 function rotationZ(angle, target) {
     target = target || new Float32Array(16);
-    let sin = Math.sin(angle);
-    let cos = Math.cos(angle);
+    var sin = Math.sin(angle);
+    var cos = Math.cos(angle);
 
     target[0] = cos;
     target[1] = sin;
@@ -296,11 +296,11 @@ function rotationZ(angle, target) {
 function axisRotation(axis, angle, target) {
     target = target || new Float32Array(16);
 
-    let x = axis.x;
-    let y = axis.y;
-    let z = axis.z;
+    var x = axis.x;
+    var y = axis.y;
+    var z = axis.z;
 
-    let l = axis.length();
+    var l = axis.length();
 
     if (l == 0) {
         return target;
@@ -310,13 +310,13 @@ function axisRotation(axis, angle, target) {
     y /= l;
     z /= l;
 
-    let xx = x * x;
-    let yy = y * y;
-    let zz = z * z;
+    var xx = x * x;
+    var yy = y * y;
+    var zz = z * z;
 
-    let cos = Math.cos(angle);
-    let sin = Math.sin(angle);
-    let oneMcos = 1 - cos;
+    var cos = Math.cos(angle);
+    var sin = Math.sin(angle);
+    var oneMcos = 1 - cos;
 
     target[0] = xx + (1 - xx) * cos;
     target[1] = x * y * oneMcos + z * sin;
@@ -350,15 +350,15 @@ function axisRotation(axis, angle, target) {
  * @returns
  */
 function lookAt(cameraPosition, target, upDirection, target) {
-    let target = target || new Float32Array(16);
-    let zAxis = Vector3.subtractVectors(cameraPosition, target).normalize();
+    var target = target || new Float32Array(16);
+    var zAxis = Vector3.subtractVectors(cameraPosition, target).normalize();
     if (zAxis.lengthSquare == 0) {
         zAxis.z = 1;
     }
     //叉乘求出 X 轴基向量
-    let xAxis = Vector3.cross(upDirection, zAxis).normalize();
+    var xAxis = Vector3.cross(upDirection, zAxis).normalize();
     //叉乘求出 Y 轴基向量
-    let yAxis = Vector3.cross(zAxis, xAxis);
+    var yAxis = Vector3.cross(zAxis, xAxis);
 
     //第一列
     target[0] = xAxis.x;
@@ -398,13 +398,13 @@ function lookAt(cameraPosition, target, upDirection, target) {
  */
 function perspective(viewRadians, aspect, near, far, target) {
     //投影盒上边坐标
-    let top = near * Math.tan(Math.PI / 180) * 0.5 * viewRadians;
+    var top = near * Math.tan(Math.PI / 180) * 0.5 * viewRadians;
     //投影盒高度
-    let height = 2 * top;
+    var height = 2 * top;
     //投影盒宽度
-    let width = aspect * height;
+    var width = aspect * height;
     //投影盒左边界坐标
-    let left = -0.5 * width;
+    var left = -0.5 * width;
     return perspectiveOfRect(left, left + width, top, top - height, near, far, target);
 }
 
@@ -423,12 +423,12 @@ function perspective(viewRadians, aspect, near, far, target) {
  */
 function perspectiveOfRect(left, right, top, bottom, near, far, target) {
     target = target || new Float32Array(16);
-    let x = (2 * near) / (right - left);
-    let y = (2 * near) / (top - bottom);
-    let a = (right + left) / (right - left);
-    let b = (top + bottom) / (top - bottom);
-    let c = -(far + near) / (far - near);
-    let d = (-2 * far * near) / (far - near);
+    var x = (2 * near) / (right - left);
+    var y = (2 * near) / (top - bottom);
+    var a = (right + left) / (right - left);
+    var b = (top + bottom) / (top - bottom);
+    var c = -(far + near) / (far - near);
+    var d = (-2 * far * near) / (far - near);
 
     target[0] = x;
     target[1] = 0;
@@ -463,7 +463,7 @@ function perspectiveOfRect(left, right, top, bottom, near, far, target) {
  */
 function inverse(m, target) {
 
-    let n11 = m[0],
+    var n11 = m[0],
         n21 = m[1],
         n31 = m[2],
         n41 = m[3],
@@ -485,17 +485,17 @@ function inverse(m, target) {
         t13 = n13 * n24 * n42 - n14 * n23 * n42 + n14 * n22 * n43 - n12 * n24 * n43 - n13 * n22 * n44 + n12 * n23 * n44,
         t14 = n14 * n23 * n32 - n13 * n24 * n32 - n14 * n22 * n33 + n12 * n24 * n33 + n13 * n22 * n34 - n12 * n23 * n34;
 
-    let determinant = n11 * t11 + n21 * t12 + n31 * t13 + n41 * t14;
+    var determinant = n11 * t11 + n21 * t12 + n31 * t13 + n41 * t14;
 
     if (determinant === 0) {
 
-        let msg = "inverse() can't invert m, determinant is 0";
+        var msg = "inverse() can't invert m, determinant is 0";
         console.warn(msg);
         return identity();
 
     }
 
-    let detInv = 1 / determinant;
+    var detInv = 1 / determinant;
 
     target[0] = t11 * detInv;
     target[1] = (n24 * n33 * n41 - n23 * n34 * n41 - n24 * n31 * n43 + n21 * n34 * n43 + n23 * n31 * n44 - n21 * n33 * n44) * detInv;
@@ -567,7 +567,7 @@ function ortho(left, right, bottom, top, near, far, target) {
  * @returns
  */
 function clone(source, target) {
-    for (let i = 0; i < source.length; i++) {
+    for (var i = 0; i < source.length; i++) {
         target[i] = source[i];
     }
     return target;

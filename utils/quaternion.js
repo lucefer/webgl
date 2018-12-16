@@ -52,63 +52,63 @@ Quaternion.prototype.setW = function (w) {
  * euler，欧拉角
  */
 Quaternion.prototype.setFromEuler = function (euler) {
-    var x = euler._x,
-        y = euler._y,
-        z = euler._z,
+    var x = euler.x,
+        y = euler.y,
+        z = euler.z,
         order = euler.order;
 
     var cos = Math.cos;
     var sin = Math.sin;
 
-    var c1 = cos(_x / 2);
-    var c2 = cos(_y / 2);
-    var c3 = cos(_z / 2);
+    var c1 = cos(x / 2);
+    var c2 = cos(y / 2);
+    var c3 = cos(z / 2);
 
-    var s1 = sin(_x / 2);
-    var s2 = sin(_y / 2);
-    var s3 = sin(_z / 2);
+    var s1 = sin(x / 2);
+    var s2 = sin(y / 2);
+    var s3 = sin(z / 2);
 
     if (order === 'XYZ') {
 
-        this._x = s1 * c2 * c3 + c1 * s2 * s3;
-        this._y = c1 * s2 * c3 - s1 * c2 * s3;
-        this._z = c1 * c2 * s3 + s1 * s2 * c3;
-        this._w = c1 * c2 * c3 - s1 * s2 * s3;
+        this.x = s1 * c2 * c3 + c1 * s2 * s3;
+        this.y = c1 * s2 * c3 - s1 * c2 * s3;
+        this.z = c1 * c2 * s3 + s1 * s2 * c3;
+        this.w = c1 * c2 * c3 - s1 * s2 * s3;
 
     } else if (order === 'YXZ') {
 
-        this._x = s1 * c2 * c3 + c1 * s2 * s3;
-        this._y = c1 * s2 * c3 - s1 * c2 * s3;
-        this._z = c1 * c2 * s3 - s1 * s2 * c3;
-        this._w = c1 * c2 * c3 + s1 * s2 * s3;
+        this.x = s1 * c2 * c3 + c1 * s2 * s3;
+        this.y = c1 * s2 * c3 - s1 * c2 * s3;
+        this.z = c1 * c2 * s3 - s1 * s2 * c3;
+        this.w = c1 * c2 * c3 + s1 * s2 * s3;
 
     } else if (order === 'ZXY') {
 
-        this._x = s1 * c2 * c3 - c1 * s2 * s3;
-        this._y = c1 * s2 * c3 + s1 * c2 * s3;
-        this._z = c1 * c2 * s3 + s1 * s2 * c3;
-        this._w = c1 * c2 * c3 - s1 * s2 * s3;
+        this.x = s1 * c2 * c3 - c1 * s2 * s3;
+        this.y = c1 * s2 * c3 + s1 * c2 * s3;
+        this.z = c1 * c2 * s3 + s1 * s2 * c3;
+        this.w = c1 * c2 * c3 - s1 * s2 * s3;
 
     } else if (order === 'ZYX') {
 
-        this._x = s1 * c2 * c3 - c1 * s2 * s3;
-        this._y = c1 * s2 * c3 + s1 * c2 * s3;
-        this._z = c1 * c2 * s3 - s1 * s2 * c3;
-        this._w = c1 * c2 * c3 + s1 * s2 * s3;
+        this.x = s1 * c2 * c3 - c1 * s2 * s3;
+        this.y = c1 * s2 * c3 + s1 * c2 * s3;
+        this.z = c1 * c2 * s3 - s1 * s2 * c3;
+        this.w = c1 * c2 * c3 + s1 * s2 * s3;
 
     } else if (order === 'YZX') {
 
-        this._x = s1 * c2 * c3 + c1 * s2 * s3;
-        this._y = c1 * s2 * c3 + s1 * c2 * s3;
-        this._z = c1 * c2 * s3 - s1 * s2 * c3;
-        this._w = c1 * c2 * c3 - s1 * s2 * s3;
+        this.x = s1 * c2 * c3 + c1 * s2 * s3;
+        this.y = c1 * s2 * c3 + s1 * c2 * s3;
+        this.z = c1 * c2 * s3 - s1 * s2 * c3;
+        this.w = c1 * c2 * c3 - s1 * s2 * s3;
 
     } else if (order === 'XZY') {
 
-        this._x = s1 * c2 * c3 - c1 * s2 * s3;
-        this._y = c1 * s2 * c3 - s1 * c2 * s3;
-        this._z = c1 * c2 * s3 + s1 * s2 * c3;
-        this._w = c1 * c2 * c3 + s1 * s2 * s3;
+        this.x = s1 * c2 * c3 - c1 * s2 * s3;
+        this.y = c1 * s2 * c3 - s1 * c2 * s3;
+        this.z = c1 * c2 * s3 + s1 * s2 * c3;
+        this.w = c1 * c2 * c3 + s1 * s2 * s3;
 
     }
 
@@ -128,10 +128,10 @@ Quaternion.prototype.setFromAxisAngle = function ( axis, angle ) {
     //根据公式 q = {w: cos(θ/2), x: sin(θ/2)*axis.x, y: sin(θ/2) * axis.y, z: sin(θ/2) * axis.z}
     var halfAngle = angle / 2, s = Math.sin( halfAngle );
 
-    this._x = axis.x * s;
-    this._y = axis.y * s;
-    this._z = axis.z * s;
-    this._w = Math.cos( halfAngle );
+    this.x = axis.x * s;
+    this.y = axis.y * s;
+    this.z = axis.z * s;
+    this.w = Math.cos( halfAngle );
 
     return this;
 
@@ -145,7 +145,7 @@ Quaternion.prototype.setFromAxisAngle = function ( axis, angle ) {
  */
 Quaternion.prototype.angleTo = function ( q ) {
     // dot(this, q) 求出当前四元数与目标四元数的夹角的余弦值。
-    return 2 * Math.acos( Math.abs( _Math.clamp( this.dot( q ), - 1, 1 ) ) );
+    return 2 * Math.acos( Math.abs( window.lib3d.math.clamp( this.dot( q ), - 1, 1 ) ) );
 
 };
 
@@ -168,9 +168,9 @@ Quaternion.prototype.inverse = function () {
  */
 Quaternion.prototype.conjugate = function () {
 
-    this._x *= - 1;
-    this._y *= - 1;
-    this._z *= - 1;
+    this.x *= - 1;
+    this.y *= - 1;
+    this.z *= - 1;
 
     return this;
 
@@ -182,6 +182,6 @@ Quaternion.prototype.conjugate = function () {
  */
 Quaternion.prototype.dot = function (q) {
 
-    return this._x * q._x + this._y * q._y + this._z * q._z + this._w * q._w;
+    return this.x * q.x + this.y * q.y + this.z * q.z + this.w * q._w;
 
 };
