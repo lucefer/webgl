@@ -31,7 +31,7 @@
 	* [源码](https://github.com/lucefer/webgl/blob/master/pages/lesson10.html)
 * [初级入门：绘制环形 : pages/lesson11.html](http://ifanqi.top/webgl/pages/lesson11.html)
 	* [源码](https://github.com/lucefer/webgl/blob/master/pages/lesson11.html)
-* [初级入门：立方体 : pages/lesson11.html](http://ifanqi.top/webgl/pages/lesson12.html)
+* [初级入门：立方体 : pages/lesson12.html](http://ifanqi.top/webgl/pages/lesson12.html)
 	* [源码](https://github.com/lucefer/webgl/blob/master/pages/lesson12.html)
 * [初级入门：纹理贴图 : pages/lesson13.html](http://ifanqi.top/webgl/pages/lesson13.html)
 	* [源码](https://github.com/lucefer/webgl/blob/master/pages/lesson13.html)
