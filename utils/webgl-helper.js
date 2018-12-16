@@ -101,7 +101,7 @@ function loadTexture(gl, src, attr, callback){
 		gl.bindTexture(gl.TEXTURE_2D, texture);
 		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
 		gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-		gl.texParameterf(gl.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
+		gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 		gl.uniform1i(attr, 0);
 		callback && callback();
 	};
