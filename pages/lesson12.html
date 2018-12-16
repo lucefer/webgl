@@ -36,6 +36,8 @@
             gl_FragColor = v_Color;
         }
     </script>
+    
+    <script src="../utils/math.js"></script>
     <script src="../utils/webgl-helper.js"></script>
     <script src="../utils/vector3.js"></script>
     <script src="../utils/webgl-matrix.js"></script>
@@ -81,10 +83,6 @@
             -0.5, -0.5, -0.5, 0, 1, 1, 1,
             0.5, -0.5, -0.5, 0, 1, 1, 1,
             0.5, -0.5, 0.5, 0, 1, 1, 1,
-
-
-
-
         ]
 
         let indices = [0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 8, 10, 11, 12, 13, 14, 12, 14, 15, 16, 17, 18, 16,
@@ -125,13 +123,11 @@
         var aspect = canvas.width / canvas.height;
         //计算正交投影矩阵
         var projectionMatrix = matrix.ortho(aspect * 4, -aspect * 4, -4, 4, 100, -100);
-
+        var deg2radians = window.lib3d.math.deg2radians;
+        var dstMatrix = matrix.identity();
         /*渲染*/
         function render() {
-            if(!playing){
-                return;
-            }
-
+            
             xAngle +=1;
             yAngle +=1;
             //先绕 Y 轴旋转矩阵。
@@ -144,20 +140,25 @@
             gl.uniformMatrix4fv(u_Matrix, false, dstMatrix);
             gl.clear(gl.COLOR_BUFFER_BIT);
             gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
-            
+            if(!playing){
+                return;
+            }
             requestAnimationFrame(render);
         }
-        render();
 
+        
+        var playing = false;
         var xAngle =0;
         var yAngle = 0;
-        var playing = false;
         var dstMatrix = matrix.identity();
         var tmpMatrix = matrix.identity();
         document.body.addEventListener('click',function(){
             playing = !playing;
             render();  
         })
+        render();
+
+        
     </script>
 </body>
 
