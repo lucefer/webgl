@@ -1,4 +1,4 @@
-(function (window) {
+(function ( lib3d) {
 	function deg2radians(deg) {
 		return Math.PI / 180 * deg;
 	}
@@ -10,9 +10,9 @@
 	function clamp(value, min, max) {
 		return Math.max(min, Math.min(value, max));
 	}
-	window.lib3d.math = {
+	lib3d.math = {
 		deg2radians: deg2radians,
 		radians2deg: radians2deg,
 		clamp: clamp
 	}
-})(window)
+})(window.lib3d || (window.lib3d = {}))

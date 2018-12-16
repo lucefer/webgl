@@ -92,13 +92,20 @@ function createProgramFromScript(gl, vertexScriptId, fragmentScriptId){
 	return program;
 }
 
-function createBuffer(gl, attribute, vertexAttribPointer){
-	let {size, type, normalize, stride, offset}  = vertexAttribPointer
-	gl.enableVertexAttribArray(attribute);
-	let buffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-	gl.vertexAttribPointer(attribute, size, type || gl.FLOAT, normalize || false, stride || 0, offset || 0);
-	return buffer;
+function loadTexture(gl, src, attr, callback){
+	var img = new Image();
+	img.crossOrigin = 'anonymous';
+	img.onload = function(){
+		gl.activeTexture(gl.TEXTURE0);
+		var texture= gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_2D, texture);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+		gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.texParameterf(gl.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
+		gl.uniform1i(attr, 0);
+		callback && callback();
+	};
+	img.src= src;
 }
 
 

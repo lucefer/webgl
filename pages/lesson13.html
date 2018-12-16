@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>纹理贴图</title>
+    <link rel="stylesheet" href="../css/common.css" />
+  </head>
+
+  <body>
+    <canvas id="canvas"></canvas>
+    <script type="shader-source" id="vertexShader">
+      //浮点数设置为中等精度
+      precision mediump float;
+      attribute vec2 a_Position;
+      uniform vec2 u_Screen_Size;
+      varying vec2 v_Uv;
+      attribute vec2 a_Uv;
+
+      void main(){
+          vec2 position = (a_Position / u_Screen_Size) * 2.0 - 1.0;
+          position = position * vec2(1.0, -1.0);
+          gl_Position = vec4(position, 0, 1);
+          v_Uv = a_Uv;
+      }
+    </script>
+    <script type="shader-source" id="fragmentShader">
+      //浮点数设置为中等精度
+      precision mediump float;
+      varying vec2 v_Uv;
+      uniform sampler2D u_Texture;
+      void main(){
+          // 点的最终颜色。
+          gl_FragColor = texture2D(u_Texture, vec2(v_Uv.x, v_Uv.y));
+      }
+    </script>
+    <script src="../utils/webgl-helper.js"></script>
+    <script src="../utils/vector3.js"></script>
+    <script src="../utils/webgl-matrix.js"></script>
+    <script>
+      //获取canvas
+      let canvas = getCanvas("#canvas");
+      //设置canvas尺寸为满屏
+      resizeCanvas(canvas);
+      //获取绘图上下文
+      let gl = getContext(canvas);
+      //创建着色器程序
+      let program = createSimpleProgramFromScript(
+        gl,
+        "vertexShader",
+        "fragmentShader"
+      );
+
+      //使用该着色器程序
+      gl.useProgram(program);
+      let positions = [
+        30,
+        30,
+        0,
+        0,
+        30,
+        300,
+        0,
+        1,
+        300,
+        300,
+        1,
+        1,
+        30,
+        30,
+        0,
+        0,
+        300,
+        300,
+        1,
+        1,
+        300,
+        30,
+        1,
+        0
+      ];
+
+      // 随机生成一个颜色。
+      var color = randomColor();
+      // 找到着色器中的全局变量 u_Color;
+      var u_Texture = gl.getUniformLocation(program, "u_Texture");
+      var u_Screen_Size = gl.getUniformLocation(program, "u_Screen_Size");
+      var a_Position = gl.getAttribLocation(program, "a_Position");
+      var a_Uv = gl.getAttribLocation(program, "a_Uv");
+
+      gl.enableVertexAttribArray(a_Position);
+      gl.enableVertexAttribArray(a_Uv);
+      // 创建缓冲区
+      var buffer = gl.createBuffer();
+      // 绑定缓冲区为当前缓冲
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      // 设置 a_Position 属性从缓冲区读取数据方式
+      gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 16, 0);
+      // 设置 a_Uv 属性从缓冲区读取数据方式
+      gl.vertexAttribPointer(a_Uv, 2, gl.FLOAT, false, 16, 8);
+      // 向缓冲区传递数据
+      gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(positions),
+        gl.STATIC_DRAW
+      );
+
+      //设置清屏颜色为黑色。
+      gl.clearColor(0, 0, 0, 1);
+     function render(){
+         gl.clear(gl.COLOR_BUFFER_BIT);
+         if(positions.length <= 0){
+             return;
+         }
+         gl.drawArrays(gl.TRIANGLES, 0, positions.length / 4);
+     }
+
+     loadTexture(gl, './img/wave.jpg', u_Texture, function(){
+         render();
+     })
+    </script>
+  </body>
+</html>
