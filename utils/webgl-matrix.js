@@ -144,7 +144,7 @@ function translation(tx, ty, tz, target) {
 }
 
 /**
- *先平移，再执行 m 的合成矩阵。
+ *先平移，再执行 m 变换的合成矩阵。
  *
  * @param {*} m
  * @param {*} tx
@@ -357,6 +357,16 @@ function lookAt(cameraPosition, target, upDirection, target) {
     }
     //叉乘求出 X 轴基向量
     var xAxis = Vector3.cross(upDirection, zAxis).normalize();
+    //如果 Y 轴和 Z 轴平行
+    if(xAxis.length() == 0){
+        if(upDirection.z == 1){
+            zAxis.x += 0.00001;
+        }else{
+            zAxis.z += 0.0001;
+        }
+        zAxis.normalize();
+        xAxis = Vector3.cross(upDirection, zAxis).normalize();
+    }
     //叉乘求出 Y 轴基向量
     var yAxis = Vector3.cross(zAxis, xAxis);
 
