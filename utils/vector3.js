@@ -108,7 +108,7 @@
 		if (vec) {
 			return Math.pow(vec.length(), 2);
 		}
-		return vec.x * vec.x + vec.y * vec.y + vec.z * vec.z;
+		return this.x * this.x + this.y * this.y + this.z * this.z;
 	}
 
 	/**
