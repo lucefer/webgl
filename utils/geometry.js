@@ -259,7 +259,7 @@ function createCone(topRadius, bottomRadius, height, bottomDivide, verticalDivid
   colors = new Uint8Array(colors);
   return {
     positions: positions,
-    colors: colors.
+    colors: colors,
     indices: indices,
     normals: normals
   };
