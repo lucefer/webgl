@@ -153,11 +153,11 @@ function createCube(width, height, depth){
 
 // 创建球体顶点数据
 function createSphere(radius, divideByYAxis, divideByCircle){
-  var yUnitAngle = Math.PI / divideByYaxis;
+  var yUnitAngle = Math.PI / divideByYAxis;
   var circleUnitAngle = Math.PI * 2 / divideByCircle;
   var positions = [];
   var normals = [];
-  for(var i = 0; i <= divideByYaxis; i++){
+  for(var i = 0; i <= divideByYAxis; i++){
     var unitY = Math.cos(yUnitAngle * i);
     var yValue = radius * unitY;
     for(var j = 0; j <= divideByCircle; j++){
@@ -173,7 +173,7 @@ function createSphere(radius, divideByYAxis, divideByCircle){
   var indices = [];
   var circleCount = divideByCircle + 1;
   for(var j = 0; j < divideByCircle; j++){
-    for(var i = 0; i < divideByYaxis; i++){
+    for(var i = 0; i < divideByYAxis; i++){
       indices.push(i * circleCount + j);
       indices.push(i * circleCount + j + 1);
       indices.push((i + 1) * circleCount + j);
@@ -259,7 +259,7 @@ function createCone(topRadius, bottomRadius, height, bottomDivide, verticalDivid
   colors = new Uint8Array(colors);
   return {
     positions: positions,
-    colors: colors.
+    colors: colors,
     indices: indices,
     normals: normals
   };
