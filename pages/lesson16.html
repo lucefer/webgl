@@ -130,12 +130,9 @@
     </script>
 
     <canvas id="canvas" width="564" height="662"></canvas> <button id="switchButton">开始动画</button>
-    <button id="clear">清除</button>
     <div class="operation-container">
-      <!-- <a href="javascript:;" id="animate" class="animate">转动</a>-->
       <div>
         <span>光照：</span>
-
         <input id="enableDiffuse" class="checkbox" type="checkbox" checked="true">漫反射
         <input id="enableSpecial" class="checkbox" type="checkbox" checked="true">镜面高光
         <input id="enableBlinPhong" class="checkbox" type="checkbox" checked="true">blinPhong
@@ -192,22 +189,22 @@
       </div>
       <div>
         <span>光源 z 轴坐标：</span>
-        <input id="lightZ" class="range" type="range" min="10" max="50" step="0.5" value="20">
+        <input id="lightZ" class="range" type="range" min="10" max="50" step="0.5" value="30">
         <label class="range-label" id="lightZValue"></label>
       </div>
       <div>
-        <span>x轴转动角度：</span>
+        <span>x 轴转动角度：</span>
         <input id="xRotation" class="range" type="range" min="0" max="360" step="1" value="0">
         <label class="range-label" id="xRotationValue"></label>
       </div>
 
       <div>
-        <span>y轴转动角度：</span>
+        <span>y 轴转动角度：</span>
         <input id="yRotation" class="range" type="range" min="0" max="360" step="1" value="0">
         <label id="yRotationValue"></label>
       </div>
       <div>
-        <span>z轴转动角度：</span>
+        <span>z 轴转动角度：</span>
         <input id="zRotation" class="range" type="range" min="0" max="360" step="1" value="0">
         <label id="zRotationValue"></label>
       </div>
@@ -223,6 +220,8 @@
       </div>
     </div>
     <script>
+      
+      var Vector3 = window.lib3d.Vector3;
       //获取canvas
       let canvas = getCanvas('#canvas');
       resizeCanvas(canvas);
@@ -416,38 +415,17 @@
           false,
           matrix.transpose(matrix.inverse(modelMatrix))
         );
-        console.log('modelMatrix:', modelMatrix);
-        console.log('inverse：', matrix.inverse(modelMatrix));
-        console.log('inverse1：', matrix.inverse(modelMatrix));
-        // gl.uniformMatrix4fv(u_NormalMatrix, false, modelMatrix);
+       
         gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix);
-        //changeFactorAndColor();
 
         cameraMatrix = matrix.lookAt(
           new Vector3(uniforms['eyeX'], uniforms['eyeY'], uniforms['eyeZ']),
           target,
           up
         );
-
-        // 从相机矩阵取逆获取视图矩阵
         viewMatrix = matrix.inverse(cameraMatrix);
 
-        let v1 = {x: 1, y: 1, z: 1, w: 1};
-        let v2 = {x: 1, y: 2, z: 0.5, w: 1};
-        let clip = matrix.multiply(projectionMatrix, viewMatrix);
-        console.log(
-          'v1:',
-          matrix.applyMatrix(v1, viewMatrix),
-          'v2:',
-          matrix.applyMatrix(v2, viewMatrix)
-        );
-        console.log(
-          'v1:',
-          matrix.applyMatrix(v1, clip),
-          'v2:',
-          matrix.applyMatrix(v2, clip)
-        );
-
+        
         gl.uniformMatrix4fv(
           u_Matrix,
           false,
@@ -492,7 +470,7 @@
         ambientFactor: 0.2,
         lightX: 0,
         lightY: 0,
-        lightZ: 10,
+        lightZ: 30,
         xRotation: 0,
         yRotation: 0,
         zRotation: 0,
@@ -510,6 +488,7 @@
       };
 
       setUniforms();
+      render(gl);
     </script>
   
 

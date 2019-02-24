@@ -140,16 +140,15 @@
         if (timer) {
           clearInterval(timer);
           timer = null;
-          switchButton.innerText = '播放动画';
+          switchButton.innerText = '播放';
         } else {
           timer = setInterval(() => {
+            switchButton.innerText = '暂停';
             xAngle += 1;
             rotateX = matrix.rotationX((Math.PI / 180) * xAngle);
-
             autoChangeLight ? changeFactorAndColor() : void 0;
             gl.uniformMatrix4fv(u_Matrix, false, matrix.multiply(per, rotateX));
             render(gl);
-            switchButton.innerText = '暂停动画';
           }, 50);
         }
       }

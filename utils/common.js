@@ -1,6 +1,6 @@
 function getRGBFromColor(color) {
     color = color.startsWith('#') ? color.substr(1) : color;
-    let hex = color.split('');
+    var hex = color.split('');
     var r = parseInt(hex[0], 16) * 16 + parseInt(hex[1], 16);
     var g = parseInt(hex[2], 16) * 16 + parseInt(hex[3], 16);
     var b = parseInt(hex[4], 16) * 16 + parseInt(hex[5], 16);

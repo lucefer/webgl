@@ -1,10 +1,82 @@
-html,body{
-	margin:0;
-	padding:0;
+html,
+body {
+  margin: 0;
+  padding: 0;
 }
-.tips{
-	position: fixed;
-	top: 10px;
-	right: 30px;
-	color: cyan;
+a {
+  color: #fff;
+}
+.operation-container {
+  position: absolute;
+  right: 20px;
+  top: 30px;
+  color: #fff;
+}
+.operation-container > div {
+  margin-bottom: 10px;
+}
+.operation-container label {
+  width: 30px;
+  display: inline-block;
+  vertical-align: top;
+}
+.operation-container span {
+  width: 150px;
+  display: inline-block;
+  vertical-align: top;
+  text-align: right;
+}
+.range {
+  opacity: 0.9;
+  width: 180px;
+  border-radius: 10px; /*è¿™ä¸ªå±žæ€§è®¾ç½®ä½¿å¡«å……è¿›åº¦æ¡æ—¶çš„å›¾å½¢ä¸ºåœ†è§’*/
+  background-color: #fff;
+  vertical-align: top;
+}
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  -webkit-box-shadow: 0 0 2px; /*è®¾ç½®æ»‘å—çš„é˜´å½±*/
+  width: 2.6rem;
+  height: 1.6rem;
+}
+
+input[type='range']::-webkit-slider-runnable-track {
+  height: 15px;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.animate {
+  display: block;
+  text-decoration: none;
+}
+.hint {
+  border-radius: 5px;
+  position: fixed;
+  right: 20px;
+  top: 20px;
+  z-index: 2;
+  max-width: 150px;
+  text-align: center;
+  font-size: 14px;
+  padding: 8px;
+  background: darkorchid;
+  color: #fff;
+}
+button {
+  outline: 0;
+  color: #ff4d4f;
+  background-color: transparent;
+  border-color: #ff4d4f;
+  text-shadow: none;
+  border-width: 2px;
+  height: 32px;
+  padding: 0 15px;
+  font-size: 14px;
+  border-radius: 4px;
+  border-style: outset;
+  -webkit-appearance: button;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
 }
