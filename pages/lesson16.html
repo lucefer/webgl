@@ -1,0 +1,516 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>镜面高光</title>
+    <link rel="stylesheet" href="../css/common.css">
+  </head>
+
+  <body>
+      
+    <script src="../utils/common.js"></script>
+    <script src="../utils/webgl-helper.js"></script>
+    <script src="../utils/vector3.js"></script>
+    <script src="../utils/webgl-matrix.js"></script>
+    <script src="../utils/geometry.js"></script>
+
+    <!-- 顶点着色器源码 -->
+    <script type="shader-source" id="vertexShaderForLight">
+      // 接收顶点坐标 (x, y)
+      precision mediump float;
+      //光源位置
+      uniform vec3 u_LightPosition;
+      void main(){
+        gl_Position = vec4(u_LightPosition, 1);
+      }
+    </script>
+    <!-- 顶点着色器源码 -->
+    <script type="shader-source" id="fragmentShaderForLight">
+      // 接收顶点坐标 (x, y)
+      precision mediump float;
+      //光线颜色
+      uniform vec3 u_LightColor;
+      void main(){
+        gl_FragColor = vec4(u_LightColor, 1);
+       }
+    </script>
+
+    <!-- 顶点着色器源码 -->
+    <script type="shader-source" id="vertexShader">
+      // 接收顶点坐标 (x, y)
+      precision mediump float;
+      attribute vec3 a_Position;
+      attribute vec4 a_Color;
+      varying vec4 v_Color;
+      attribute vec3 a_Normal;
+      varying vec3 v_Normal;
+      uniform mat4 u_Matrix;
+      varying vec3 v_Position;
+      uniform mat4 u_NormalMatrix;
+      uniform mat4 u_ModelMatrix;
+      uniform vec3 u_LightPosition ;
+      varying vec3 v_LightDirection ;
+      uniform vec3 u_ViewPosition;
+      varying vec3 v_ViewDirection;
+      void main(){
+        gl_Position = u_Matrix * vec4(a_Position, 1);
+        v_Color = a_Color;
+        vec3 vv = reflect(a_Normal,a_Position);
+        v_Normal = mat3(u_NormalMatrix) * a_Normal;
+        v_Position = vec3(u_ModelMatrix * vec4(a_Position,1));
+        v_ViewDirection = u_ViewPosition - v_Position;
+        v_LightDirection = u_LightPosition  - v_Position;
+      }
+    </script>
+
+    <!-- 片元着色器源码 -->
+    <script type="shader-source" id="fragmentShader">
+      precision mediump float;
+      varying vec4 v_Color;
+      uniform vec3 u_LightColor;
+      uniform float u_AmbientFactor;
+      uniform vec3 u_LightPosition;
+      varying vec3 v_Position;
+      varying vec3 v_Normal;
+      uniform vec3 u_ViewPosition;
+      uniform mat4 u_ModelMatrix;
+      varying vec3 v_ViewDirection;
+      varying vec3 v_LightDirection;
+      uniform bool enableDiffuse;
+      uniform bool enableSpecial;
+      uniform float shiness;
+      uniform bool enableBlinPhong;
+      void main(){
+        // 环境光分量
+        vec3 ambient = u_AmbientFactor * u_LightColor; //环境光分量
+        // 光源照射方向向量
+        vec3 lightDirection =   u_LightPosition  - v_Position;
+
+        //lightDirection = v_LightDirection;
+        lightDirection= normalize(lightDirection);
+        // 漫反射因子
+        float diffuseFactor = dot(normalize(lightDirection), normalize(v_Normal));
+        //
+        diffuseFactor = max(diffuseFactor, 0.0);
+        // 漫反射分量
+        vec3 diffuseLightColor =u_LightColor * diffuseFactor;
+
+        vec3 viewDirection = normalize(u_ViewPosition - v_Position);
+
+        //viewDirection = normalize(v_ViewDirection);
+        vec3 halfVector = (viewDirection + lightDirection);
+        vec3 reflectDirection = reflect(-lightDirection, normalize(v_Normal));
+       //float specialFactor = dot(normalize(-viewDirection), normalize(reflectDirection));
+
+        float specialFactor= 0.0;
+        if(diffuseFactor > 0.0){
+        if(enableBlinPhong){
+          specialFactor = dot(normalize(v_Normal),normalize(halfVector));
+        }else{
+          specialFactor = dot(normalize(viewDirection), normalize(reflectDirection));
+        }
+
+         specialFactor = max(specialFactor,0.0);
+         specialFactor = pow(specialFactor, shiness);
+       }
+        vec3 specialLightColor  = u_LightColor * specialFactor * 0.5;
+
+        vec3 outColor = ambient;
+        if(enableDiffuse) {
+          outColor += diffuseLightColor;
+        }
+
+        if(enableSpecial){
+          outColor += specialLightColor;
+        }
+
+         gl_FragColor = v_Color * vec4(outColor  , 1);
+       // gl_FragColor = v_Color * vec4((ambient + diffuseLightColor),1) ;
+      }
+    </script>
+
+    <canvas id="canvas" width="564" height="662"></canvas> <button id="switchButton">开始动画</button>
+    <button id="clear">清除</button>
+    <div class="operation-container">
+      <!-- <a href="javascript:;" id="animate" class="animate">转动</a>-->
+      <div>
+        <span>光照：</span>
+
+        <input id="enableDiffuse" class="checkbox" type="checkbox" checked="true">漫反射
+        <input id="enableSpecial" class="checkbox" type="checkbox" checked="true">镜面高光
+        <input id="enableBlinPhong" class="checkbox" type="checkbox" checked="true">blinPhong
+      </div>
+      <div>
+        <span>光滑度：</span>
+        <input id="shiness" class="range" type="range" min="1" max="256" step="2" value="32">
+        <label class="range-label" id="shinessValue"></label>
+      </div>
+      <div>
+        <span>沿 y 轴缩放：</span>
+        <input id="modelScaleY" class="range" type="range" min="0" max="5" step="0.2" value="1">
+        <label class="range-label" id="modelScaleYValue"></label>
+      </div>
+      <div>
+        <span>眼睛 x 轴坐标：</span>
+        <input id="eyeX" class="range" type="range" min="0" max="50" step="0.5" value="0">
+        <label class="range-label" id="eyeXValue"></label>
+      </div>
+      <div>
+        <span>眼睛 y 轴坐标：</span>
+        <input id="eyeY" class="range" type="range" min="0" max="50" step="0.5" value="0">
+        <label class="range-label" id="eyeYValue"></label>
+      </div>
+      <div>
+        <span>眼睛 z 轴坐标：</span>
+        <input id="eyeZ" class="range" type="range" min="0" max="50" step="0.5" value="0">
+        <label class="range-label" id="eyeZValue"></label>
+      </div>
+      <div>
+        <span>物体 x 轴坐标：</span>
+        <input id="modelX" class="range" type="range" min="-25" max="25" step="0.5" value="0">
+        <label class="range-label" id="modelXValue"></label>
+      </div>
+      <div>
+        <span>物体 y 轴坐标：</span>
+        <input id="modelY" class="range" type="range" min="0" max="50" step="0.5" value="0">
+        <label class="range-label" id="modelYValue"></label>
+      </div>
+      <div>
+        <span>物体 z 轴坐标：</span>
+        <input id="modelZ" class="range" type="range" min="0" max="50" step="0.5" value="0">
+        <label class="range-label" id="modelZValue"></label>
+      </div>
+      <div>
+        <span>光源 x 轴坐标：</span>
+        <input id="lightX" class="range" type="range" min="0" max="50" step="0.5" value="0">
+        <label class="range-label" id="lightXValue"></label>
+      </div>
+      <div>
+        <span>光源 y 轴坐标：</span>
+        <input id="lightY" class="range" type="range" min="0" max="50" step="0.5" value="0">
+        <label class="range-label" id="lightYValue"></label>
+      </div>
+      <div>
+        <span>光源 z 轴坐标：</span>
+        <input id="lightZ" class="range" type="range" min="10" max="50" step="0.5" value="20">
+        <label class="range-label" id="lightZValue"></label>
+      </div>
+      <div>
+        <span>x轴转动角度：</span>
+        <input id="xRotation" class="range" type="range" min="0" max="360" step="1" value="0">
+        <label class="range-label" id="xRotationValue"></label>
+      </div>
+
+      <div>
+        <span>y轴转动角度：</span>
+        <input id="yRotation" class="range" type="range" min="0" max="360" step="1" value="0">
+        <label id="yRotationValue"></label>
+      </div>
+      <div>
+        <span>z轴转动角度：</span>
+        <input id="zRotation" class="range" type="range" min="0" max="360" step="1" value="0">
+        <label id="zRotationValue"></label>
+      </div>
+      <div>
+        <span>环境光强度：</span>
+        <input id="ambientFactor" class="range" type="range" min="0" max="1" step="0.01" value="0.2">
+        <label id="ambientFactorValue"></label>
+      </div>
+      <div>
+        <span>环境光颜色：</span>
+        <input id="lightColor" class="color" type="color" value="#FFFFFF">
+        <label id="lightColorValue" style="width: 200px"></label>
+      </div>
+    </div>
+    <script>
+      //获取canvas
+      let canvas = getCanvas('#canvas');
+      resizeCanvas(canvas);
+      //获取webgl绘图环境
+      let gl = getContext(canvas);
+      //创建着色器程序
+      let program = createSimpleProgramFromScript(
+        gl,
+        'vertexShader',
+        'fragmentShader'
+      );
+      //使用创建好的着色器程序
+      gl.useProgram(program);
+
+      let rate = canvas.width / canvas.height;
+      let hori = rate;
+      let per = null;
+      per = matrix.ortho(-hori * 15, hori * 15, -15, 15, 100, -100);
+
+      //顶点信息
+      let cube = createSphere(10, 10, 10); //createCube(10, 10, 10);
+      cube = transformIndicesToUnIndices(cube);
+      createColorForVertex(cube);
+      let positions = cube.positions;
+      let indices = cube.indices;
+      let colors = cube.colors;
+      let normals = cube.normals;
+
+      let a_Position = gl.getAttribLocation(program, 'a_Position');
+      let a_Color = gl.getAttribLocation(program, 'a_Color');
+      let a_Normal = gl.getAttribLocation(program, 'a_Normal');
+      let u_Matrix = gl.getUniformLocation(program, 'u_Matrix');
+      let u_Texture = gl.getUniformLocation(program, 'u_Texture');
+      let u_AmbientFactor = gl.getUniformLocation(program, 'u_AmbientFactor');
+      let u_LightColor = gl.getUniformLocation(program, 'u_LightColor');
+      let u_LightPosition = gl.getUniformLocation(program, 'u_LightPosition');
+      let u_NormalMatrix = gl.getUniformLocation(program, 'u_NormalMatrix');
+      let u_ModelMatrix = gl.getUniformLocation(program, 'u_ModelMatrix');
+      let u_LightMatrix = gl.getUniformLocation(program, 'u_LightMatrix');
+      let u_ViewPosition = gl.getUniformLocation(program, 'u_ViewPosition');
+      let enableDiffuse = gl.getUniformLocation(program, 'enableDiffuse');
+      let enableSpecial = gl.getUniformLocation(program, 'enableSpecial');
+      let enableBlinPhong = gl.getUniformLocation(program, 'enableBlinPhong');
+      let shiness = gl.getUniformLocation(program, 'shiness');
+      gl.enableVertexAttribArray(a_Position);
+      gl.enableVertexAttribArray(a_Color);
+      gl.enableVertexAttribArray(a_Normal);
+      // 计算投影矩阵
+      var aspect = canvas.clientWidth / canvas.clientHeight;
+      var fieldOfViewRadians = 60;
+      var projectionMatrix = matrix.perspective(
+        fieldOfViewRadians,
+        aspect,
+        1,
+        2000
+      );
+
+      // 计算相机在圆上的位置矩阵
+      var cameraPosition = new Vector3(0, 0, 6);
+      var target = new Vector3(0, 0, 0);
+      var up = new Vector3(0, 1, 0);
+      var cameraMatrix = matrix.lookAt(cameraPosition, target, up);
+      var modelMatrix = matrix.identity();
+      // 从相机矩阵取逆获取视图矩阵
+      var viewMatrix = matrix.inverse(cameraMatrix);
+      var viewProjectionMatrix = matrix.multiply(projectionMatrix, viewMatrix);
+
+      //console.log(matrix.applyMatrix({ x: 40, y: 40, z: 40, w: 1 }, viewProjectionMatrix))
+
+      gl.uniformMatrix4fv(u_Matrix, false, viewProjectionMatrix);
+
+      //往顶点着色器中传入 canvas 尺寸。
+      //let a_Screen_Size = gl.getAttribLocation(program, 'a_Screen_Size');
+      //gl.vertexAttrib3f(a_Screen_Size, canvas.width, canvas.height, 600);
+
+      let buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+
+      gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+      gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
+
+      let colorBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+
+      gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
+      gl.vertexAttribPointer(a_Color, 4, gl.UNSIGNED_BYTE, true, 0, 0);
+
+      let normalBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, normals, gl.STATIC_DRAW);
+      gl.vertexAttribPointer(a_Normal, 3, gl.FLOAT, false, 0, 0);
+
+      function render(gl) {
+        //用上一步设置的清空画布颜色清空画布。
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        if (positions.length <= 0) {
+          return;
+        }
+        console.log(cube);
+        //绘制图元设置为三角形。
+        let primitiveType = gl.TRIANGLES;
+        gl.drawArrays(primitiveType, 0, positions.length / 3);
+      }
+      //设置清屏颜色
+      gl.clearColor(0, 0, 0, 1.0);
+      gl.enable(gl.DEPTH_TEST);
+      gl.enable(gl.CULL_FACE);
+
+      let angle = 0;
+      let xAngle = 0;
+      console.log(indices);
+      let timer = null;
+      switchButton.addEventListener('click', animate);
+      let scaleMatrix = matrix.scale(1);
+      let direction = 0.05;
+      function animate(e) {
+        if (timer) {
+          clearInterval(timer);
+          timer = null;
+        } else {
+          timer = setInterval(() => {
+            if (uniforms.xRotation == 360) {
+              uniforms.xRotation = 0;
+            }
+            uniforms.xRotation += 1;
+
+            if (uniforms.modelScaleY > 2 || uniforms.modelScaleY < 1) {
+              //direction = - direction;
+            }
+
+            //uniforms.modelScaleY += direction;
+
+            setUniforms();
+            //changeFactorAndColor();
+            //gl.uniformMatrix4fv(u_Matrix, false, matrix.multiply(viewProjectionMatrix, matrix.multiply(rotateX, scaleMatrix)));
+            render(gl);
+          }, 50);
+        }
+      }
+
+      function setUniforms() {
+        gl.uniform3f(
+          u_LightColor,
+          uniforms['lightColor'].r / 255,
+          uniforms['lightColor'].g / 255,
+          uniforms['lightColor'].b / 255
+        );
+        console.log(uniforms['lightZ']);
+        gl.uniform3f(
+          u_LightPosition,
+          uniforms['lightX'],
+          uniforms['lightY'],
+          uniforms['lightZ']
+        );
+        gl.uniform3f(
+          u_ViewPosition,
+          uniforms['eyeX'],
+          uniforms['eyeY'],
+          uniforms['eyeZ']
+        );
+        gl.uniform1f(u_AmbientFactor, uniforms['ambientFactor']);
+        gl.uniform1i(enableDiffuse, uniforms['enableDiffuse']);
+        gl.uniform1i(enableSpecial, uniforms['enableSpecial']);
+        gl.uniform1i(enableBlinPhong, uniforms['enableBlinPhong']);
+        gl.uniform1f(shiness, uniforms['shiness']);
+
+        let modelMatrix = matrix.identity();
+        modelMatrix = matrix.translate(modelMatrix, uniforms['modelX'], 0, 0);
+        modelMatrix = matrix.translate(modelMatrix, 0, uniforms['modelY'], 0);
+        modelMatrix = matrix.translate(modelMatrix, 0, 0, uniforms['modelZ']);
+
+        modelMatrix = matrix.rotateY(
+          modelMatrix,
+          (Math.PI / 180) * uniforms['yRotation']
+        );
+        modelMatrix = matrix.rotateX(
+          modelMatrix,
+          (Math.PI / 180) * uniforms['xRotation']
+        );
+        modelMatrix = matrix.rotateZ(
+          modelMatrix,
+          (Math.PI / 180) * uniforms['zRotation']
+        );
+        modelMatrix = matrix.multiply(
+          modelMatrix,
+          matrix.scalation(1, uniforms['modelScaleY'], 1)
+        );
+
+        gl.uniformMatrix4fv(
+          u_NormalMatrix,
+          false,
+          matrix.transpose(matrix.inverse(modelMatrix))
+        );
+        console.log('modelMatrix:', modelMatrix);
+        console.log('inverse：', matrix.inverse(modelMatrix));
+        console.log('inverse1：', matrix.inverse(modelMatrix));
+        // gl.uniformMatrix4fv(u_NormalMatrix, false, modelMatrix);
+        gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix);
+        //changeFactorAndColor();
+
+        cameraMatrix = matrix.lookAt(
+          new Vector3(uniforms['eyeX'], uniforms['eyeY'], uniforms['eyeZ']),
+          target,
+          up
+        );
+
+        // 从相机矩阵取逆获取视图矩阵
+        viewMatrix = matrix.inverse(cameraMatrix);
+
+        let v1 = {x: 1, y: 1, z: 1, w: 1};
+        let v2 = {x: 1, y: 2, z: 0.5, w: 1};
+        let clip = matrix.multiply(projectionMatrix, viewMatrix);
+        console.log(
+          'v1:',
+          matrix.applyMatrix(v1, viewMatrix),
+          'v2:',
+          matrix.applyMatrix(v2, viewMatrix)
+        );
+        console.log(
+          'v1:',
+          matrix.applyMatrix(v1, clip),
+          'v2:',
+          matrix.applyMatrix(v2, clip)
+        );
+
+        gl.uniformMatrix4fv(
+          u_Matrix,
+          false,
+          matrix.multiply(per, matrix.multiply(viewMatrix, modelMatrix))
+        );
+      }
+
+      $$('.range').forEach(function(input) {
+        input.addEventListener('input', function() {
+          let uniformAttr = uniforms[this.id];
+          if (this.id == 'lightColor') {
+            uniforms[this.id] = getRGBFromColor(this.value);
+            $$(this.id + 'Value').innerHTML =
+              'r : ' +
+              uniformAttr.r +
+              ', g : ' +
+              uniformAttr.g +
+              ', b : ' +
+              uniformAttr.b;
+          } else {
+            uniforms[this.id] = Number(this.value);
+            $$(this.id + 'Value').innerHTML = this.value;
+          }
+          setUniforms();
+          render(gl);
+        });
+      });
+      $$('.checkbox').forEach(function(input) {
+        input.addEventListener('change', function() {
+          uniforms[this.id] = this.checked;
+          setUniforms();
+          render(gl);
+        });
+      });
+      
+      let uniforms = {
+        lightColor: {
+          r: 255,
+          g: 255,
+          b: 255
+        },
+        ambientFactor: 0.2,
+        lightX: 0,
+        lightY: 0,
+        lightZ: 10,
+        xRotation: 0,
+        yRotation: 0,
+        zRotation: 0,
+        modelX: 0,
+        modelY: 0,
+        modelZ: 0,
+        modelScaleY: 1,
+        enableDiffuse: true,
+        enableSpecial: true,
+        enableBlinPhong: true,
+        shiness: 32,
+        eyeX: 0,
+        eyeY: 0,
+        eyeZ: 10
+      };
+
+      setUniforms();
+    </script>
+  
+
+</body></html>

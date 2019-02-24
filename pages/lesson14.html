@@ -1,0 +1,216 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>环境光照</title>
+    <link rel="stylesheet" href="../css/common.css">
+  </head>
+
+  <body>
+      
+    <script src="../utils/common.js"></script>
+    <script src="../utils/webgl-helper.js"></script>
+    <script src="../utils/webgl-matrix.js"></script>
+    <script src="../utils/vector3.js"></script>
+    <script src="../utils/geometry.js"></script>
+    <!-- 顶点着色器源码 -->
+    <script type="shader-source" id="vertexShader">
+      precision mediump float;
+      // 接收顶点坐标 (x, y, z)
+      attribute vec3 a_Position;
+      // 接收浏览器窗口尺寸(width, height)
+      attribute vec2 a_Screen_Size;
+      // 接收顶点颜色
+      attribute vec4 a_Color;
+      varying vec4 v_Color;
+      // 接收模型-视图-投影矩阵。
+      uniform mat4 u_Matrix;
+      void main(){
+        gl_Position = u_Matrix * vec4(a_Position, 1);
+        v_Color = a_Color;
+       }
+    </script>
+
+    <!-- 片元着色器源码 -->
+    <script type="shader-source" id="fragmentShader">
+      precision mediump float;
+      // 接收颜色信息
+      varying vec4 v_Color;
+      // 接收环境光照颜色
+      uniform vec3 u_LightColor;
+      // 接收环境光照强度
+      uniform float u_AmbientFactor;
+      void main(){
+        vec3 ambient = u_AmbientFactor * u_LightColor;
+        gl_FragColor = v_Color * vec4(ambient, 1);
+      }
+    </script>
+
+    <canvas id="canvas" width="564" height="662"></canvas>
+
+    <div class="operation-container">
+      <div>
+        环境光强度：
+        <input id="ambientFactor" class="range" type="range" min="0" max="1" step="0.01" value="0.2">
+        <label id="factor">0.2</label>
+      </div>
+      <div>
+        环境光颜色：
+        <input id="lightColor" class="color" type="color" value="#FFFFFF">
+        <label id="light" style="width: 200px">r : 255, g : 255, b : 255</label>
+      </div>
+
+      <button id="autoChangeLightButton">启用自动变光</button>
+      <button id="switchButton">播放动画</button>
+    </div>
+    <script>
+      var canvas = getCanvas('#canvas');
+      resizeCanvas(canvas);
+      var gl = getContext(canvas);
+      var program = createSimpleProgramFromScript(
+        gl,
+        'vertexShader',
+        'fragmentShader'
+      );
+      gl.useProgram(program);
+      // 屏幕宽高比
+      var rate = canvas.width / canvas.height;
+      // 正交投影矩阵
+      var per = matrix.ortho(-rate * 15, rate * 15, -15, 15, 100, -100);
+      //椎体
+      var cone = createCone(6, 3, 12, 12, 6);
+      //将椎体索引信息转化为无索引形式
+      cone = transformIndicesToUnIndices(cone);
+      //为椎体增加随机颜色。
+      createColorForVertex(cone);
+      var positions = cone.positions,
+        indices = cone.indices,
+        colors = cone.colors;
+
+      var a_Position = gl.getAttribLocation(program, 'a_Position');
+      var a_Color = gl.getAttribLocation(program, 'a_Color');
+      var u_Matrix = gl.getUniformLocation(program, 'u_Matrix');
+      var u_Texture = gl.getUniformLocation(program, 'u_Texture');
+      var u_AmbientFactor = gl.getUniformLocation(program, 'u_AmbientFactor');
+      var u_LightColor = gl.getUniformLocation(program, 'u_LightColor');
+
+      gl.enableVertexAttribArray(a_Position);
+      gl.enableVertexAttribArray(a_Color);
+
+      var buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+
+      gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+      gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
+
+      var colorBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+
+      gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
+      gl.vertexAttribPointer(a_Color, 4, gl.UNSIGNED_BYTE, true, 0, 0);
+
+      function render(gl) {
+        //用上一步设置的清空画布颜色清空画布。
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        if (positions.length <= 0) {
+          return;
+        }
+        //绘制图元设置为三角形。
+        var primitiveType = gl.TRIANGLES;
+        gl.drawArrays(primitiveType, 0, positions.length / 3);
+      }
+      //设置清屏颜色
+      gl.clearColor(0, 0, 0, 1.0);
+      gl.enable(gl.DEPTH_TEST);
+      gl.enable(gl.CULL_FACE);
+
+      var xAngle = 0;
+      var timer = null;
+      var autoChangeLight = false;
+      switchButton.addEventListener('click', animate);
+
+      autoChangeLightButton.addEventListener('click', enableChangeLight);
+      function enableChangeLight() {
+        autoChangeLight = !autoChangeLight;
+        autoChangeLightButton.innerText = autoChangeLight
+          ? '禁用自动变光'
+          : '启用自动变光';
+      }
+      function animate(e) {
+        if (timer) {
+          clearInterval(timer);
+          timer = null;
+          switchButton.innerText = '播放动画';
+        } else {
+          timer = setInterval(() => {
+            xAngle += 1;
+            rotateX = matrix.rotationX((Math.PI / 180) * xAngle);
+
+            autoChangeLight ? changeFactorAndColor() : void 0;
+            gl.uniformMatrix4fv(u_Matrix, false, matrix.multiply(per, rotateX));
+            render(gl);
+            switchButton.innerText = '暂停动画';
+          }, 50);
+        }
+      }
+      gl.uniformMatrix4fv(u_Matrix, false, per);
+      gl.uniform3f(u_LightColor, 1, 1, 1);
+      gl.uniform1f(u_AmbientFactor, 0.2);
+
+      $$('#factor').innerHTML = $$('#ambientFactor').value;
+      $$('#ambientFactor').addEventListener('input', function() {
+        gl.uniform1f(u_AmbientFactor, this.value);
+        $$('#factor').innerHTML = this.value;
+        render(gl);
+      });
+      
+      $$('#light').innerHTML = 'r : 255, g : 255, b : 255';
+      $$('#lightColor').addEventListener('input', function() {
+        var color = getRGBFromColor(this.value);
+        $$('#light').innerHTML =
+          'r : ' + color.r + ', g : ' + color.g + ', b : ' + color.b;
+        gl.uniform3f(u_LightColor, color.r / 255, color.g / 255, color.b / 255);
+        render(gl);
+      });
+
+      var factor = 1,
+        color = {
+          r: 255,
+          g: 255,
+          b: 255
+        };
+      var colorRStep = 6,
+        colorGStep = 5,
+        colorBStep = 4,
+        factorStep = 0.01;
+      
+      function changeFactorAndColor() {
+        if (factor >= 1 || factor <= 0) {
+          factorStep *= -1;
+        }
+        if (color.r >= 255 || color.r <= 0) {
+          colorRStep *= -1;
+        }
+        if (color.g >= 255 || color.g <= 0) {
+          colorGStep *= -1;
+        }
+        if (color.b >= 255 || color.g <= 0) {
+          colorBStep *= -1;
+        }
+
+        color.r += colorRStep;
+        color.g += colorGStep;
+        color.b += colorBStep;
+
+        $$('#light').innerHTML =
+          'r :' + color.r + ', g :' + color.g + ', b :' + color.b;
+        $$('#lightColor').value = getHexColorFromRGB(color);
+
+        gl.uniform1f(u_AmbientFactor, factor);
+        gl.uniform3f(u_LightColor, color.r / 255, color.g / 255, color.b / 255);
+      }
+      render(gl);
+    </script>
+  
+
+</body></html>
