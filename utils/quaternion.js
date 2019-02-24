@@ -1,9 +1,11 @@
-(function(window){/**
+(function(window){
+/**
  *四元数构造函数
  *
  * @param {*} x
  * @param {*} y
  * @param {*} z
+ * @param {*} w
  */
 function Quaternion(x, y, z, w) {
   this.x = x || 0;
@@ -372,5 +374,7 @@ Quaternion.prototype.slerp = function ( q, t,qt ) {
 		return this;
 
 };
+	
 lib3d.Quaternion = Quaternion;
+	
 })(window.lib3d || (window.lib3d = {}));

@@ -1,4 +1,4 @@
-(function ( lib3d) {
+(function (lib3d) {
 	function deg2radians(deg) {
 		return Math.PI / 180 * deg;
 	}
