@@ -61,7 +61,7 @@
       </div>
 
       <button id="autoChangeLightButton">启用自动变光</button>
-      <button id="switchButton">播放动画</button>
+      <button id="switchButton">播放</button>
     </div>
     <script>
       var canvas = getCanvas('#canvas');
@@ -143,13 +143,13 @@
           switchButton.innerText = '播放';
         } else {
           timer = setInterval(() => {
-            switchButton.innerText = '暂停';
             xAngle += 1;
             rotateX = matrix.rotationX((Math.PI / 180) * xAngle);
             autoChangeLight ? changeFactorAndColor() : void 0;
             gl.uniformMatrix4fv(u_Matrix, false, matrix.multiply(per, rotateX));
             render(gl);
           }, 50);
+          switchButton.innerText = '暂停';
         }
       }
       gl.uniformMatrix4fv(u_Matrix, false, per);
