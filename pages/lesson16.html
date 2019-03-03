@@ -129,7 +129,7 @@
       }
     </script>
 
-    <canvas id="canvas" width="564" height="662"></canvas> <button id="switchButton">播放</button>
+    <canvas id="canvas" width="564" height="662"></canvas> 
     <div class="operation-container">
       <div>
         <span>光照：</span>
@@ -218,6 +218,7 @@
         <input id="lightColor" class="color" type="color" value="#FFFFFF">
         <label id="lightColorValue" style="width: 200px"></label>
       </div>
+      <button id="switchButton">播放</button>
     </div>
     <script>
       
@@ -341,24 +342,18 @@
         if (timer) {
           clearInterval(timer);
           timer = null;
+          switchButton.innerText = '播放';
         } else {
           timer = setInterval(() => {
             if (uniforms.xRotation == 360) {
               uniforms.xRotation = 0;
             }
             uniforms.xRotation += 1;
-
-            if (uniforms.modelScaleY > 2 || uniforms.modelScaleY < 1) {
-              //direction = - direction;
-            }
-
-            //uniforms.modelScaleY += direction;
-
             setUniforms();
-            //changeFactorAndColor();
-            //gl.uniformMatrix4fv(u_Matrix, false, matrix.multiply(viewProjectionMatrix, matrix.multiply(rotateX, scaleMatrix)));
+            render(gl);
             render(gl);
           }, 50);
+          switchButton.innerText = '暂停';
         }
       }
 
