@@ -261,7 +261,6 @@
           timer = null;
         } else {
           timer = setInterval(() => {
-            switchButton.innerText = '暂停';
             if (uniforms.xRotation == 360) {
               uniforms.xRotation = 0;
             }
@@ -270,6 +269,7 @@
             render(gl);
 
           }, 50);
+          switchButton.innerText = '暂停';
         }
       }
 
