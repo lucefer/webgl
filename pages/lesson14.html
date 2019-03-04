@@ -51,8 +51,8 @@
     <div class="operation-container">
       <div>
         环境光强度：
-        <input id="ambientFactor" class="range" type="range" min="0" max="1" step="0.01" value="0.2">
-        <label id="factor">0.2</label>
+        <input id="ambientFactor" class="range" type="range" min="0" max="1" step="0.01" value="0.5">
+        <label id="factor">0.5</label>
       </div>
       <div>
         环境光颜色：
@@ -154,7 +154,7 @@
       }
       gl.uniformMatrix4fv(u_Matrix, false, per);
       gl.uniform3f(u_LightColor, 1, 1, 1);
-      gl.uniform1f(u_AmbientFactor, 0.2);
+      gl.uniform1f(u_AmbientFactor, 0.5);
 
       $$('#factor').innerHTML = $$('#ambientFactor').value;
       $$('#ambientFactor').addEventListener('input', function() {

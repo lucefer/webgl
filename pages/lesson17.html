@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>利用欧拉角控制模型旋转</title>
+    <link rel="stylesheet" href="../css/common.css" />
+  </head>
+
+  <body>
+    <script src="../utils/webgl-helper.js"></script>
+    <script src="../utils/webgl-matrix.js"></script>
+    <script src="../utils/vector3.js"></script>
+    <script src="../utils/geometry.js"></script>
+    <script src="../utils/math.js"></script>
+    <script src="../utils/model.js"></script>
+
+    <!-- 顶点着色器源码 -->
+    <script type="shader-source" id="vertexShader">
+      precision mediump float;
+      attribute vec4 a_Color;
+      varying vec4 v_Color;
+      attribute vec3 a_Position;
+      uniform mat4 u_Matrix;
+      void main(){
+        gl_Position = u_Matrix * vec4(a_Position,1);
+        v_Color = a_Color;
+      }
+    </script>
+    <!-- 顶点着色器源码 -->
+    <script type="shader-source" id="fragmentShader">
+      // 接收顶点坐标 (x, y)
+      precision mediump float;
+      varying vec4 v_Color;
+      void main(){
+        gl_FragColor = v_Color;
+      }
+    </script>
+
+    <canvas id="canvas"></canvas>
+    <div class="operation-container"></div>
+    <script>
+        var Vector3 = window.lib3d.Vector3;
+      //获取canvas
+      var canvas = getCanvas('#canvas');
+      resizeCanvas(canvas);
+      //获取webgl绘图环境
+      var gl = getContext(canvas);
+      //创建着色器程序
+      var program = createProgramFromScript(
+        gl,
+        'vertexShader',
+        'fragmentShader'
+      );
+      //使用创建好的着色器程序
+      gl.useProgram(program.program);
+
+      var rate = canvas.width / canvas.height;
+      var cube = createCube(3, 3, 3);
+
+      cube = transformIndicesToUnIndices(cube);
+      var bufferInfo = createBufferInfoFromObject(gl, cube);
+
+      var objectList = new List();
+      var renderList = new List();
+
+      var aspect = canvas.width / canvas.height;
+      var fieldOfViewRadians = 60;
+      var projectionMatrix = matrix.perspective(
+        fieldOfViewRadians,
+        aspect,
+        2,
+        900
+      );
+      // 计算相机的位置矩阵
+      var cameraPosition = new Vector3(0, 0, 10);
+      var target = new Vector3(0, 0, 0);
+      var up = new Vector3(0, 1, 0);
+      var cameraMatrix = matrix.lookAt(cameraPosition, target, up);
+      var viewMatrix = matrix.inverse(cameraMatrix);
+      var modelMatrix = matrix.identity();
+      var object = new Model('cube');
+      object.setBufferInfo(bufferInfo);
+      objectList.add(object);
+      renderList.add({
+        programInfo: program,
+        model: object,
+        primitive: 'TRIANGLES',
+        renderType: 'drawArrays'
+      });
+
+      var lastProgramInfo;
+      var lastBufferInfo;
+      gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+      gl.clearColor(0, 0, 0, 1);
+      gl.enable(gl.CULL_FACE);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      var currentMatrix = matrix.identity();
+      var playing = false;
+      gl.enable(gl.DEPTH_TEST);
+      function render() {
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        objectList.forEach(function(object) {
+          var worldMatrix = matrix.multiply(viewMatrix, currentMatrix);
+          worldMatrix = matrix.multiply(projectionMatrix, worldMatrix);
+          object.uniforms.u_Matrix = worldMatrix;
+        });
+        renderList.forEach(function(object) {
+          var programInfo = object.programInfo;
+          var bufferInfo = object.model.bufferInfo;
+          var uniforms = object.model.uniforms;
+          var bindBuffers = false;
+          if (programInfo !== lastProgramInfo) {
+            lastProgramInfo = programInfo;
+            gl.useProgram(programInfo.program);
+            bindBuffers = true;
+          }
+
+          if (bindBuffers || bufferInfo !== lastBufferInfo) {
+            lastBufferInfo = bufferInfo;
+            setBufferInfos(gl, programInfo, bufferInfo);
+          }
+          setUniforms(programInfo, uniforms);
+
+          // 绘制
+          if (object.renderType === 'drawElements') {
+            if (bufferInfo.indices) {
+              gl.drawElements(
+                object.primitive,
+                bufferInfo.indices.length,
+                gl.UNSIGNED_SHORT,
+                0
+              );
+              return;
+            }
+          } else {
+            gl.drawArrays(gl[object.primitive], 0, bufferInfo.elementsCount);
+            return;
+          }
+        });
+      }
+
+      render();
+      var lastMatrix = matrix.identity();
+      var tempMatrix = matrix.identity();
+      var angle = 0;
+      var factor = 0.6;
+      var radian = window.lib3d.math.deg2radian;
+      // 判断是否支持触摸事件。
+      var supportTouchEvent = 'ontouchstart' in window;
+      var dragStartEvent = supportTouchEvent ? 'touchstart' : 'mousedown';
+      var dragMoveEvent = supportTouchEvent ? 'touchmove' : 'mousemove';
+      var dragEndEvent = supportTouchEvent ? 'touchend' : 'mouseup';
+
+      document.body.addEventListener(dragStartEvent, function(e) {
+        e = supportTouchEvent ? e.changedTouches[0] : e;
+        var px = e.pageX;
+        var py = e.pageY;
+        document.body.addEventListener(dragEndEvent, function up(e) {
+          matrix.cloneMatrix(currentMatrix, lastMatrix);
+          document.body.removeEventListener(dragEndEvent, up);
+          document.body.removeEventListener(dragMoveEvent, move);
+        });
+
+        function move(e) {
+          e = supportTouchEvent ? e.changedTouches[0] : e;
+          var ppx = e.pageX;
+          var ppy = e.pageY;
+          var dx = ppx - px;
+          var dy = ppy - py;
+          var l = Math.sqrt(dx * dx + dy * dy);
+          if (l == 0) {
+            return;
+          }
+          var euler = {
+            x: factor * dy * radian,
+            y: factor * dx * radian,
+            z: 0
+          };
+          tempMatrix = matrix.getMatrixFromEuler(euler);
+          currentMatrix = matrix.multiply(
+            tempMatrix,
+            lastMatrix,
+            currentMatrix
+          );
+          render();
+        }
+        document.body.addEventListener(dragMoveEvent, move);
+      });
+    </script>
+  </body>
+</html>
