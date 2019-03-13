@@ -261,7 +261,106 @@ Quaternion.prototype.normalize = function () {
 
 
 };
+Quaternion.fromRotation = function(axis, angle) {
+  angle = (Math.PI / 180) * angle;
+  var cos = Math.cos(angle / 2);
+  var sin = Math.sin(angle / 2);
+  return new Quaternion(axis.x * sin, axis.y * sin, axis.z * sin, cos);
+};
+Quaternion.multiplyQuaternions = function(q1, q2) {
+  // from http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
+  var target = new Quaternion();
+  var qax = q1.x,
+    qay = q1.y,
+    qaz = q1.z,
+    qaw = q1.w;
+  var qbx = q2.x,
+    qby = q2.y,
+    qbz = q2.z,
+    qbw = q2.w;
 
+  target.setX(qax * qbw + qaw * qbx + qay * qbz - qaz * qby);
+  target.setY(qay * qbw + qaw * qby + qaz * qbx - qax * qbz);
+  target.setZ(qaz * qbw + qaw * qbz + qax * qby - qay * qbx);
+  target.setW(qaw * qbw - qax * qbx - qay * qby - qaz * qbz);
+
+  return target;
+};
+Quaternion.makeRotationFromQuaternion = function(q, dst) {
+  var zero = new Vector3(0, 0, 0);
+  var one = new Vector3(1, 1, 1);
+
+  return compose(
+    zero,
+    q,
+    one,
+    dst
+  );
+};
+Quaternion.multiplyQuaternion = function(q1, q2, target) {
+  target = target || new Quaternion();
+  var qax = q1.x,
+    qay = q1.y,
+    qaz = q1.z,
+    qaw = q1.w;
+  var qbx = q2.x,
+    qby = q2.y,
+    qbz = q2.z,
+    qbw = q2.w;
+
+  target.setX(qax * qbw + qaw * qbx + qay * qbz - qaz * qby);
+  target.setY(qay * qbw + qaw * qby + qaz * qbx - qax * qbz);
+  target.setZ(qaz * qbw + qaw * qbz + qax * qby - qay * qbx);
+  target.setW(qaw * qbw - qax * qbx - qay * qby - qaz * qbz);
+
+  return target;
+};
+function compose(position, quaternion, scale, target) {
+  target = target || new Float32Array(16);
+
+  var x = quaternion.x,
+    y = quaternion.y,
+    z = quaternion.z,
+    w = quaternion.w;
+  var x2 = x + x,
+    y2 = y + y,
+    z2 = z + z;
+  var xx = x * x2,
+    xy = x * y2,
+    xz = x * z2;
+  var yy = y * y2,
+    yz = y * z2,
+    zz = z * z2;
+  var wx = w * x2,
+    wy = w * y2,
+    wz = w * z2;
+
+  var sx = scale.x,
+    sy = scale.y,
+    sz = scale.z;
+
+  target[0] = (1 - (yy + zz)) * sx;
+  target[1] = (xy + wz) * sx;
+  target[2] = (xz - wy) * sx;
+  target[3] = 0;
+
+  target[4] = (xy - wz) * sy;
+  target[5] = (1 - (xx + zz)) * sy;
+  target[6] = (yz + wx) * sy;
+  target[7] = 0;
+
+  target[8] = (xz + wy) * sz;
+  target[9] = (yz - wx) * sz;
+  target[10] = (1 - (xx + yy)) * sz;
+  target[11] = 0;
+
+  target[12] = position.x;
+  target[13] = position.y;
+  target[14] = position.z;
+  target[15] = 1;
+
+  return target;
+}
 /**
  *四元数相乘
  *

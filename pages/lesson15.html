@@ -158,7 +158,7 @@
         <input id="lightColor" class="color" type="color" value="#FFFFFF">
         <label id="lightColorValue" style="width: 200px"></label>
       </div>
-      <button id="switchButton">开始动画</button>
+      <button id="switchButton">播放</button>
     </div>
     <script>
       var canvas = getCanvas('#canvas');
@@ -261,7 +261,6 @@
           timer = null;
         } else {
           timer = setInterval(() => {
-            switchButton.innerText = '暂停';
             if (uniforms.xRotation == 360) {
               uniforms.xRotation = 0;
             }
@@ -270,6 +269,7 @@
             render(gl);
 
           }, 50);
+          switchButton.innerText = '暂停';
         }
       }
 
