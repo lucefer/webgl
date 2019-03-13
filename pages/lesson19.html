@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>绘制球体</title>
+    <link rel="stylesheet" href="../css/common.css" />
+  </head>
+
+  <body>
+    <script src="../utils/webgl-helper.js"></script>
+    <script src="../utils/webgl-matrix.js"></script>
+    <script src="../utils/vector3.js"></script>
+    <script src="../utils/geometry.js"></script>
+    <script src="../utils/math.js"></script>
+    <!-- 顶点着色器源码 -->
+    <script type="shader-source" id="vertexShader">
+      precision mediump float;
+      attribute vec3 a_Position;
+      attribute vec4 a_Color;
+      varying vec4 v_Color;
+      uniform mat4 u_Matrix;
+      void main(){
+        gl_Position = u_Matrix * vec4(a_Position, 1);
+        v_Color = a_Color;
+      }
+    </script>
+
+    <!-- 片元着色器源码 -->
+    <script type="shader-source" id="fragmentShader">
+      precision mediump float;
+      varying vec4 v_Color;
+      void main(){
+        gl_FragColor = v_Color  ;
+      }
+    </script>
+
+    <canvas id="canvas"></canvas>
+    <div class="operation-container">
+      <button id="switchButton">播放</button>
+    </div>
+    <script>
+      var Vector3 = window.lib3d.Vector3;
+      //获取canvas
+      var canvas = getCanvas('#canvas');
+      resizeCanvas(canvas);
+      //获取webgl绘图环境
+      var gl = getContext(canvas);
+      //创建着色器程序
+      var program = createSimpleProgramFromScript(
+        gl,
+        'vertexShader',
+        'fragmentShader'
+      );
+      //使用创建好的着色器程序
+      gl.useProgram(program);
+      //顶点信息
+      var sphere = createSphere(5, 12, 12);
+      sphere = transformIndicesToUnIndices(sphere);
+      createColorForVertex(sphere);
+      var positions = sphere.positions;
+      var indices = sphere.indices;
+      var colors = sphere.colors;
+
+      var a_Position = gl.getAttribLocation(program, 'a_Position');
+      var a_Color = gl.getAttribLocation(program, 'a_Color');
+      var u_Matrix = gl.getUniformLocation(program, 'u_Matrix');
+      var u_Texture = gl.getUniformLocation(program, 'u_Texture');
+
+      gl.enableVertexAttribArray(a_Position);
+      gl.enableVertexAttribArray(a_Color);
+      var aspect = canvas.clientWidth / canvas.clientHeight;
+      var fieldOfViewRadians = 60;
+      var projectionMatrix = matrix.perspective(
+        fieldOfViewRadians,
+        aspect,
+        1,
+        2000
+      );
+      var cameraPosition = new Vector3(0, 0, 20);
+      var target = new Vector3(0, 0, 0);
+      var up = new Vector3(0, 1, 0);
+      var cameraMatrix = matrix.lookAt(cameraPosition, target, up);
+      var viewMatrix = matrix.inverse(cameraMatrix);
+      var viewProjectionMatrix = matrix.multiply(projectionMatrix, viewMatrix);
+
+      gl.uniformMatrix4fv(u_Matrix, false, viewProjectionMatrix);
+
+      var buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+
+      gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+      gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
+
+      var colorBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+
+      gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
+      gl.vertexAttribPointer(a_Color, 4, gl.UNSIGNED_BYTE, true, 0, 0);
+      var indicesBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indicesBuffer);
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+
+      function render(gl) {
+        //用上一步设置的清空画布颜色清空画布。
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        if (positions.length <= 0) {
+          return;
+        }
+        //绘制图元设置为三角形。
+        let primitiveType = gl.TRIANGLES;
+        gl.drawArrays(primitiveType, 0, sphere.positions.length / 3);
+      }
+      //设置清屏颜色
+      gl.clearColor(0, 0, 0, 1.0);
+      gl.enable(gl.DEPTH_TEST);
+      gl.enable(gl.CULL_FACE);
+
+      var yAngle = 0;
+      var xAngle = 0;
+      var timer = null;
+      var matrixX = matrix.identity();
+      var matrixY = matrix.identity();
+      switchButton.addEventListener('click', animate);
+
+      function animate(e) {
+        if (timer) {
+          clearInterval(timer);
+          timer = null;
+        } else {
+          timer = setInterval(() => {
+            yAngle += 1;
+            xAngle += 1;
+            matrixY = matrix.rotationY((Math.PI / 180) * yAngle, matrixY);
+            matrixX = matrix.rotateX(
+              matrixY,
+              (Math.PI / 180) * xAngle,
+              matrixX
+            );
+
+            gl.uniformMatrix4fv(
+              u_Matrix,
+              false,
+              matrix.multiply(viewProjectionMatrix, matrixX)
+            );
+            render(gl);
+          }, 50);
+        }
+      }
+      render(gl);
+    </script>
+  </body>
+</html>
