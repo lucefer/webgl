@@ -91,6 +91,7 @@
       );
       //使用创建好的着色器程序
       gl.useProgram(program.program);
+      //创建帧缓冲需要的2D纹理
       var texture = gl.createTexture();
 
       function imgReady() {
@@ -114,9 +115,9 @@
       /*创建帧缓冲*/
       var frameTexture;
       var frameBuffer = gl.createFramebuffer();
-      gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
       var attachmentPoint = gl.COLOR_ATTACHMENT0;
       var data = null;
+      gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
       gl.activeTexture(gl.TEXTURE0);
       frameTexture = gl.createTexture();
       gl.bindTexture(gl.TEXTURE_2D, frameTexture);
@@ -131,7 +132,6 @@
         gl.UNSIGNED_BYTE,
         data
       );
-      var level = 0;
       // 创建一个深度缓冲
       var renderBuffer = gl.createRenderbuffer();
       gl.bindRenderbuffer(gl.RENDERBUFFER, renderBuffer);
@@ -157,7 +157,7 @@
       function drawFrame() {
         gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
         gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.clearColor(0, 0, 0, 1);
+        gl.clearColor(0.3, 0.3, 0.5, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.viewport(0, 0, 256, 256);
         gl.uniform1i(u_Skybox, 0);
@@ -183,13 +183,8 @@
         'u_EnablePoint'
       );
 
-      var rate = canvas.width / canvas.height;
       var cube = createCube(1, 1, 1);
       cube = transformIndicesToUnIndices(cube);
-      var points = [];
-      function rand(min, max) {
-        return Math.random() * (max - min) + min;
-      }
       var bufferInfo = createBufferInfoFromObject(gl, cube);
       var objectList = new List();
       var renderList = new List();
@@ -201,7 +196,7 @@
         1,
         900
       );
-      // 计算相机在圆上的位置矩阵
+      // 计算视图矩阵
       var cameraPosition = new Vector3(0, 0, 3);
       var target = new Vector3(0, 0, -100);
       var up = new Vector3(0, 1, 0);
@@ -270,7 +265,7 @@
             });
           }
 
-          let worldMatrix = matrix.multiply(
+           var worldMatrix = matrix.multiply(
             modelMatrix,
             object.uniforms.u_ModelMatrix || currentMatrix
           );
