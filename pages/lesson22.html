@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>帧缓冲</title>
+    <link rel="stylesheet" href="../css/common.css" />
+    <style type="text/css">
+      body {
+        background-color: #000;
+      }
+    </style>
+  </head>
+
+  <body>
+    <script src="../utils/webgl-helper.js"></script>
+    <script src="../utils/webgl-matrix.js"></script>
+    <script src="../utils/math.js"></script>
+    <script src="../utils/model.js"></script>
+    <script src="../utils/vector3.js"></script>
+    <script src="../utils/geometry.js"></script>
+
+    <!-- 顶点着色器源码 -->
+    <script type="shader-source" id="vertexShader">
+      precision mediump float;
+      attribute vec4 a_Color;
+      varying vec4 v_Color;
+      attribute vec3 a_Position;
+      attribute vec2 a_Texcoord;
+      uniform mat4 u_Matrix;
+      uniform mat4 u_ModelMatrix;
+      varying vec2 v_Texcoord;
+      void main(){
+        gl_Position = u_Matrix * vec4(a_Position,1);
+        v_Color = a_Color;
+        v_Texcoord = a_Texcoord;
+       }
+    </script>
+
+    <!-- 片元着色器源码 -->
+    <script type="shader-source" id="fragmentShader">
+      precision mediump float;
+      varying vec2 v_Texcoord;
+      uniform bool useTexture;
+      varying vec4 v_Color;
+      uniform sampler2D  u_Skybox;
+      void main(){
+        if(useTexture){
+            gl_FragColor =texture2D(u_Skybox, v_Texcoord);
+        } else{
+            gl_FragColor = v_Color;
+        }
+      }
+    </script>
+
+    <canvas id="canvas"></canvas>
+
+    <div class="operation-container">
+      <button style="position:fixed;bottom:0;left:0;" id="switchButton">
+        开始动画
+      </button>
+      <div>
+        <span id="xRotation" width="200px;">x 轴转动角度：</span>
+        <label class="range-label" id="xRotationValue"></label>
+      </div>
+
+      <div>
+        <span id="yRotation" width="200px;">y 轴转动角度：</span>
+        <label id="yRotationValue"></label>
+      </div>
+      <div>
+        <span id="zRotation" width="200px;">z 轴转动角度：</span>
+        <label id="zRotationValue"></label>
+      </div>
+    </div>
+    <script>
+      var Vector3 = window.lib3d.Vector3;
+      var deg2radians = window.lib3d.math.deg2radians;
+      //获取canvas
+      var canvas = getCanvas('#canvas');
+      resizeCanvas(canvas);
+      //获取webgl绘图环境
+      var gl = getContext(canvas);
+      //创建着色器程序
+      var program = createProgramFromScript(
+        gl,
+        'vertexShader',
+        'fragmentShader'
+      );
+      //使用创建好的着色器程序
+      gl.useProgram(program.program);
+      //创建帧缓冲需要的2D纹理
+      var texture = gl.createTexture();
+      function imgReady() {
+        texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(
+          gl.TEXTURE_2D,
+          0,
+          gl.RGBA,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          this
+        );
+        var level = 0;
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      }
+      /*加载图像*/
+      var img = new Image();
+      img.onload = imgReady;
+      img.src = '../img/top.png';
+      /*创建帧缓冲*/
+      var frameTexture;
+      var frameBuffer = gl.createFramebuffer();
+      var attachmentPoint = gl.COLOR_ATTACHMENT0;
+      var data = null;
+      gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
+      gl.activeTexture(gl.TEXTURE0);
+      frameTexture = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, frameTexture);
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA,
+        256,
+        256,
+        0,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        data
+      );
+      // 创建一个深度缓冲
+      var renderBuffer = gl.createRenderbuffer();
+      gl.bindRenderbuffer(gl.RENDERBUFFER, renderBuffer);
+      gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, 256, 256);
+      gl.framebufferRenderbuffer(
+        gl.FRAMEBUFFER,
+        gl.DEPTH_ATTACHMENT,
+        gl.RENDERBUFFER,
+        renderBuffer
+      );
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.framebufferTexture2D(
+        gl.FRAMEBUFFER,
+        gl.COLOR_ATTACHMENT0,
+        gl.TEXTURE_2D,
+        frameTexture,
+        0
+      );
+      //绘制帧缓冲图像
+      function drawFrame() {
+        gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.clearColor(0.3, 0.3, 0.5, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.viewport(0, 0, 256, 256);
+        gl.uniform1i(u_Skybox, 0);
+        render(0);
+      }
+      //绘制到画布
+      function drawCanvas() {
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.bindTexture(gl.TEXTURE_2D, frameTexture);
+        gl.uniform1i(useTexture, true);
+        gl.clearColor(0, 0, 0, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        gl.uniform1i(u_Skybox, 0);
+        render(1);
+      }
+      var u_Skybox = gl.getUniformLocation(program.program, 'u_Skybox');
+      var useTexture = gl.getUniformLocation(program.program, 'useTexture');
+      var u_EnablePoint = gl.getUniformLocation(
+        program.program,
+        'u_EnablePoint'
+      );
+      var cube = createCube(1, 1, 1);
+      cube = transformIndicesToUnIndices(cube);
+      var bufferInfo = createBufferInfoFromObject(gl, cube);
+      var objectList = new List();
+      var renderList = new List();
+      var aspect = canvas.clientWidth / canvas.clientHeight;
+      var fieldOfViewRadians = 70;
+      var projectionMatrix = matrix.perspective(
+        fieldOfViewRadians,
+        aspect,
+        1,
+        900
+      );
+      // 计算视图矩阵
+      var cameraPosition = new Vector3(0, 0, 3);
+      var target = new Vector3(0, 0, -100);
+      var up = new Vector3(0, 1, 0);
+      var cameraMatrix = matrix.lookAt(cameraPosition, target, up);
+      var modelMatrix = matrix.identity();
+      var viewMatrix = matrix.inverse(cameraMatrix);
+      for (var ii = 0; ii < 2; ++ii) {
+        var object = new Model('model' + ii);
+        if (ii == 1) {
+          object.setBufferInfo(bufferInfo);
+          object.translate(0.7, 0, 0);
+          object.preRender(viewMatrix, projectionMatrix);
+        } else {
+          object.setBufferInfo(bufferInfo);
+        }
+        objectList.add(object);
+        renderList.add({
+          programInfo: program,
+          model: object,
+          primitive: 'TRIANGLES',
+          renderType: 'drawArrays'
+        });
+      }
+      var lastProgramInfo;
+      var lastBufferInfo;
+      var playing = false;
+      var uniforms = {
+        xRotation: 0,
+        yRotation: -90,
+        zRotation: 0
+      };
+      var currentMatrix = matrix.identity();
+      gl.enable(gl.DEPTH_TEST);
+      function draw() {
+        if (!playing) {
+          return;
+        }
+        drawFrame();
+        drawCanvas();
+        requestAnimationFrame(draw);
+      }
+      function render(defaultFrame) {
+        document.querySelector('#yRotation').innerHTML =
+          'Y轴：' + uniforms.yRotation;
+        document.querySelector('#xRotation').innerHTML =
+          'X轴：' + uniforms.xRotation;
+        document.querySelector('#zRotation').innerHTML =
+          'Z轴：' + uniforms.zRotation;
+        objectList.forEach(function(object) {
+          let modelMatrix;
+          if (object.name == 'model0') {
+            uniforms.yRotation += 0.5;
+            modelMatrix = matrix.getMatrixFromEuler({
+              x: 0,
+              y: deg2radians(uniforms.yRotation),
+              z: 0
+            });
+          } else {
+            uniforms.zRotation += 0.5;
+            modelMatrix = matrix.getMatrixFromEuler({
+              x: 0,
+              y: 0,
+              z: deg2radians(uniforms.zRotation)
+            });
+          }
+           var worldMatrix = matrix.multiply(
+            modelMatrix,
+            object.uniforms.u_ModelMatrix || currentMatrix
+          );
+          worldMatrix = matrix.multiply(viewMatrix, worldMatrix);
+          worldMatrix = matrix.multiply(projectionMatrix, worldMatrix);
+          object.uniforms.u_Matrix = worldMatrix;
+        });
+        renderList.forEach(function(object) {
+          var programInfo = object.programInfo;
+          var bufferInfo = object.model.bufferInfo;
+          var uniforms = object.model.uniforms;
+          var bindBuffers = false;
+          if (object.model.name !== 'model0') {
+            if (defaultFrame) {
+              return;
+            }
+          }
+          if (programInfo !== lastProgramInfo) {
+            lastProgramInfo = programInfo;
+            gl.useProgram(programInfo.program);
+            bindBuffers = true;
+          }
+          if (bindBuffers || bufferInfo !== lastBufferInfo) {
+            lastBufferInfo = bufferInfo;
+            setBufferInfos(gl, programInfo, bufferInfo);
+          }
+          setUniforms(programInfo, uniforms);
+          gl.uniform1i(u_EnablePoint, false);
+          // 绘制
+          if (object.renderType === 'drawElements') {
+            if (bufferInfo.indices) {
+              gl.drawElements(
+                object.primitive,
+                bufferInfo.indices.length,
+                gl.UNSIGNED_SHORT,
+                0
+              );
+              return;
+            } else {
+              console.warn('model buffer does not support indices to draw');
+              return;
+            }
+          } else {
+            gl.drawArrays(gl[object.primitive], 0, bufferInfo.elementsCount);
+          }
+        });
+      }
+      $$('#switchButton').addEventListener('click', function() {
+        playing = !playing;
+        draw();
+      });
+    </script>
+  </body>
+</html>
