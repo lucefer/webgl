@@ -83,7 +83,7 @@
         // 光源照射方向向量
         vec3 lightDirection = u_LightPosition - v_Position;
         // 漫反射因子
-        float diffuseFactor = dot(normalize(lightDirection), normalize(v_Normal));
+        float diffuseFactor = dot(normalize(-lightDirection), normalize(v_Normal));
         //
         diffuseFactor = max(diffuseFactor, 0.0);
         // 漫反射分量
