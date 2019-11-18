@@ -124,9 +124,7 @@
         tear: ' precision highp float;uniform sampler2D u_Texture;varying vec2 v_TextureCoordsVarying;uniform float u_Time;const float PI = 3.1415926;float rand(float n) {return fract(sin(n) * 43758.5453123);}void main (void) {float maxJitter = 0.06;float duration = 0.3;float colorROffset = 0.01;float colorBOffset = -0.025;float time = mod(u_Time, duration * 2.0);float amplitude = max(sin(time * (PI / duration)), 0.0);float jitter = rand(v_TextureCoordsVarying.y) * 5.0 - 1.0;bool needOffset = abs(jitter) < maxJitter * amplitude;float textureX = v_TextureCoordsVarying.x + (needOffset ? jitter : (jitter * amplitude * 0.006));vec2 textureCoords = vec2(textureX, v_TextureCoordsVarying.y);vec4 mask = texture2D(u_Texture, textureCoords);vec4 maskR = texture2D(u_Texture, textureCoords + vec2(colorROffset * amplitude, 0.0));vec4 maskB = texture2D(u_Texture, textureCoords + vec2(colorBOffset * amplitude, 0.0));gl_FragColor = vec4(maskR.r, mask.g, maskB.b, mask.a);}'
       }
     }
-    var programPool = {
-
-    }
+    var programPool = {};
     //获取canvas
     var canvas = getCanvas('#canvas');
     resizeCanvas(canvas, window.innerWidth, window.innerWidth);
@@ -156,20 +154,14 @@
       buffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
       gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
-
       gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
       bufferCoords = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, bufferCoords);
-
       gl.vertexAttribPointer(a_TextureCoords, 2, gl.FLOAT, false, 0, 0);
-
-
       gl.bufferData(gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW);
     }
 
-
     initLocation(program);
-
 
     var timer = null;
 
@@ -185,19 +177,14 @@
     var startTime = Date.now();
     var interval = 0.02;
     var start = 0;
-    var endTime = Date.now();
     var time = 0;
     gl.clearColor(0, 0, 0, 1);
     function loop() {
-
       if (video.ended) {
         return;
       }
       computeFrame();
-      if (time > 1) {
-        //return;
-      }
-      time = time + interval//(Date.now() - startTime) / 1000;
+      time = time + interval;
 
       gl.uniform1f(u_Time, time);
       // 清除画布
@@ -207,11 +194,9 @@
       }
       //绘制图元设置为三角形。
       var primitiveType = gl.TRIANGLES;
-
       //因为我们要绘制6个点，所以执行6次顶点绘制操作。
       gl.drawArrays(gl.TRIANGLES, 0, positions.length / 3);
       timer = requestAnimationFrame(loop);
-
     }
     var canvasBg = $$('#canvasBg');
     var ctxBg = canvasBg.getContext('2d');
@@ -244,13 +229,10 @@
             timer = null;
           }
           timer = requestAnimationFrame(loop);
-        })
-
-
-      })
+        });
+      });
     })
     function computeFrame() {
-
       ctxBg.drawImage(video, 0, 0, 256, 256);
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, texture);
