@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <script src="../utils/webgl-helper.js"></script>
+  <style type="text/css">
+    body {
+      background: #000;
+    }
+
+    #video {
+      display: none;
+    }
+
+    button {
+      border: 5px solid #3af3eb;
+      border-radius: 100%;
+      width: 50px;
+      height: 50px;
+      background-color: transparent;
+      color: #3af3eb;
+      vertical-align: middle;
+      outline: none;
+    }
+
+    .white {
+      color: #3af3eb;
+    }
+
+    .soul {
+      border-color: #ed2c99;
+      color: #ed2c99;
+    }
+
+    .enlarge {
+      border-color: #919297;
+      color: #919297;
+    }
+
+    .ghost {
+      border-color: #2ca2f4;
+      color: #2ca2f4;
+    }
+
+    .tear {
+      border-color: #6c43e7;
+      color: #6c43e7;
+    }
+
+    #canvasBg {
+      display: none;
+    }
+
+    #fixed {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 132px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+    }
+
+    #fixed>div {
+      flex: 1;
+    }
+
+    #fixed p {
+      height: 50px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="fixed">
+    <div>
+      <button id="white" class="white"></button>
+      <p class="white">闪白</p>
+    </div>
+    <div>
+      <button id="soul" class="soul"></button>
+      <p class="soul">灵魂
+        <br/>出窍</p>
+    </div>
+    <div>
+      <button id="ghost" class="ghost"></button>
+      <p class="ghost">残影</p>
+    </div>
+    <div>
+      <button id="tear" class="tear"></button>
+      <p class="tear">毛刺</p>
+    </div>
+    <div>
+      <button id="enlarge" class="enlarge"></button>
+      <p class="enlarge">放大</p>
+    </div>
+
+
+  </div>
+
+  <canvas id="canvas"></canvas>
+  <canvas id="canvasBg" width="256" height="256"></canvas>
+  <video id="video" src="../img/movie.mp4" controls></video>
+
+
+  <script>
+    var glslString = {
+      vertex: {
+        common: 'precision highp float;attribute vec3 a_Position;attribute vec2 a_TextureCoords;varying vec2 v_TextureCoordsVarying;const float PI = 3.1415926;void main (void) {gl_Position = vec4(a_Position,1.0);v_TextureCoordsVarying = a_TextureCoords;}',
+        enlarge: 'precision mediump float;attribute vec3 a_Position;attribute vec2 a_TextureCoords;varying vec2 v_TextureCoordsVarying;uniform float u_Time;void main(void) {float scaleNormal = mod(u_Time, 1.2) / 2.0;float scale = 1. + scaleNormal;if (scale > 1.3) {scale = 1.3 - (scale - 1.3);}mat4 matrix = mat4(vec4(1. * scale, 0, 0, 0), vec4(0, 1. * scale, 0, 0), vec4(0, 0, 1, 0), vec4(0, 0, 0, 1));gl_Position = matrix * vec4(a_Position, 1.0);v_TextureCoordsVarying = a_TextureCoords;}'
+      },
+      fragment: {
+        white: 'precision highp float;uniform sampler2D u_Texture;varying vec2 v_TextureCoordsVarying;uniform float u_Time;const float PI = 3.1415926;void main (void) {float duration =0.5;float time = mod(u_Time, duration);vec4 whiteMask = vec4(1, 1, 1, 1.0);float amplitude = abs(sin(u_Time * (PI / duration)));vec4 mask = texture2D(u_Texture, v_TextureCoordsVarying);gl_FragColor = mask * (1.0 - amplitude) + whiteMask * amplitude;}',
+        ghost: 'precision highp float;uniform sampler2D u_Texture;varying vec2 v_TextureCoordsVarying;uniform float u_Time;void main (void) {float duration = 0.7;float maxScale = 1.1;float offset = 0.02;float progress = mod(u_Time, duration) / duration;vec2 offsetCoords = vec2(offset, offset) * progress;float scale = 1.0 + (maxScale - 1.0) * progress;vec2 ScaleTextureCoords = vec2(0.5, 0.5) + (v_TextureCoordsVarying - vec2(0.5, 0.5)) / scale;vec4 maskR = texture2D(u_Texture, ScaleTextureCoords + offsetCoords);vec4 maskB = texture2D(u_Texture, ScaleTextureCoords - offsetCoords);vec4 mask = texture2D(u_Texture, ScaleTextureCoords);gl_FragColor = vec4(maskR.r, mask.g, maskB.b, mask.a);}',
+        soul: 'precision highp float;uniform sampler2D u_Texture;varying vec2 v_TextureCoordsVarying;uniform float u_Time;void main (void) {float duration = 1.7;float maxAlpha = 0.4;float maxScale = 1.8;float progress = mod(u_Time, duration) / duration; float alpha = maxAlpha * (1.0 - progress);float scale = 1.0 + (maxScale - 1.0) * progress;float weakX = 0.5 + (v_TextureCoordsVarying.x - 0.5) / scale;float weakY = 0.5 + (v_TextureCoordsVarying.y - 0.5) / scale;vec2 weakTextureCoords = vec2(weakX, weakY);vec4 weakMask = texture2D(u_Texture, weakTextureCoords);vec4 mask = texture2D(u_Texture, v_TextureCoordsVarying);gl_FragColor = mask * (1.0 - alpha) + weakMask * alpha;}',
+        enlarge: 'precision mediump float;uniform sampler2D u_Texture;varying vec2 v_TextureCoordsVarying;void main (void) {gl_FragColor = texture2D(u_Texture,v_TextureCoordsVarying);}',
+        tear: ' precision highp float;uniform sampler2D u_Texture;varying vec2 v_TextureCoordsVarying;uniform float u_Time;const float PI = 3.1415926;float rand(float n) {return fract(sin(n) * 43758.5453123);}void main (void) {float maxJitter = 0.06;float duration = 0.3;float colorROffset = 0.01;float colorBOffset = -0.025;float time = mod(u_Time, duration * 2.0);float amplitude = max(sin(time * (PI / duration)), 0.0);float jitter = rand(v_TextureCoordsVarying.y) * 5.0 - 1.0;bool needOffset = abs(jitter) < maxJitter * amplitude;float textureX = v_TextureCoordsVarying.x + (needOffset ? jitter : (jitter * amplitude * 0.006));vec2 textureCoords = vec2(textureX, v_TextureCoordsVarying.y);vec4 mask = texture2D(u_Texture, textureCoords);vec4 maskR = texture2D(u_Texture, textureCoords + vec2(colorROffset * amplitude, 0.0));vec4 maskB = texture2D(u_Texture, textureCoords + vec2(colorBOffset * amplitude, 0.0));gl_FragColor = vec4(maskR.r, mask.g, maskB.b, mask.a);}'
+      }
+    }
+    var programPool = {};
+    //获取canvas
+    var canvas = getCanvas('#canvas');
+    resizeCanvas(canvas, window.innerWidth, window.innerWidth);
+    //获取webgl绘图环境
+    var gl = getContext(canvas);
+    //创建着色器程序
+    var program = createProgramFromString(
+      gl,
+      glslString.vertex.common,
+      glslString.fragment.white
+    );
+    programPool.white = program.program;
+    //使用创建好的着色器程序
+    program = program.program;
+    gl.useProgram(program);
+    var u_Time, u_Texture, a_Position, a_TextureCoords, positions, bufferCoords, coords;
+    coords = new Float32Array([0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1]);
+    positions = new Float32Array([-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, 1, 0, -1, -1, 0, 1, -1, 0])
+    function initLocation(program) {
+      u_Time = gl.getUniformLocation(program, 'u_Time');
+      u_Texture = gl.getUniformLocation(program, 'u_Texture');
+      a_Position = gl.getAttribLocation(program, 'a_Position');
+      gl.enableVertexAttribArray(a_Position);
+      a_TextureCoords = gl.getAttribLocation(program, 'a_TextureCoords');
+      gl.enableVertexAttribArray(a_TextureCoords);
+      gl.uniform1f(u_Time, false, 0);
+      buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
+      gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+      bufferCoords = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, bufferCoords);
+      gl.vertexAttribPointer(a_TextureCoords, 2, gl.FLOAT, false, 0, 0);
+      gl.bufferData(gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW);
+    }
+
+    initLocation(program);
+
+    var timer = null;
+
+    document.body.addEventListener('click', () => {
+      if (timer) {
+        cancelAnimationFrame(timer);
+        timer = null;
+      } else {
+        time = 0;
+        timer = requestAnimationFrame(loop);
+      }
+    })
+    var startTime = Date.now();
+    var interval = 0.02;
+    var start = 0;
+    var time = 0;
+    gl.clearColor(0, 0, 0, 1);
+    function loop() {
+      if (video.ended) {
+        return;
+      }
+      computeFrame();
+      time = time + interval;
+
+      gl.uniform1f(u_Time, time);
+      // 清除画布
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      if (positions.length <= 0) {
+        return;
+      }
+      //绘制图元设置为三角形。
+      var primitiveType = gl.TRIANGLES;
+      //因为我们要绘制6个点，所以执行6次顶点绘制操作。
+      gl.drawArrays(gl.TRIANGLES, 0, positions.length / 3);
+      timer = requestAnimationFrame(loop);
+    }
+    var canvasBg = $$('#canvasBg');
+    var ctxBg = canvasBg.getContext('2d');
+    var texture = gl.createTexture();
+    var video = $$('#video');
+
+    [].forEach.call($$('button'), function (item) {
+      item.addEventListener('click', function (e) {
+        if (!programPool[item.id]) {
+          //创建着色器程序
+          var program = createProgramFromString(
+            gl,
+            glslString.vertex[item.id == 'enlarge' ? 'enlarge' : 'common'],
+            glslString.fragment[item.id]
+          );
+          programPool[item.id] = program.program;
+          //使用创建好的着色器程序
+          program = program.program;
+          gl.useProgram(program);
+          initLocation(program);
+        } else {
+          gl.useProgram(programPool[item.id]);
+          initLocation(programPool[item.id]);
+        }
+        e.stopPropagation();
+
+        video.play().then(function () {
+          if (timer) {
+            cancelAnimationFrame(timer);
+            timer = null;
+          }
+          timer = requestAnimationFrame(loop);
+        });
+      });
+    })
+    function computeFrame() {
+      ctxBg.drawImage(video, 0, 0, 256, 256);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvasBg);
+      gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.uniform1i(u_Texture, 0);
+      return;
+    }
+  </script>
+</body>
+
+</html>
