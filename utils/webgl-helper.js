@@ -55,13 +55,41 @@ function createShader(gl, type, source) {
   console.error(gl.getShaderInfoLog(shader));
   gl.deleteShader(shader);
 }
-
+/**
+ *
+ *
+ * @param {*} gl，webgl绘图环境
+ * @param {*} type，着色器类型
+ * @param {*} str，着色器源码
+ * @returns 返回着色器对象
+ */
+function createShaderFromString(gl, type, str) {
+  return createShader(gl, type, str);
+}
 function createShaderFromScript(gl, type, scriptId) {
   let sourceScript = $$('#' + scriptId);
   if (!sourceScript) {
     return null;
   }
   return createShader(gl, type, sourceScript.innerHTML);
+}
+function createProgramFromString(gl, vertexString, fragmentString) {
+  //创建顶点着色器
+  let vertexShader = createShaderFromString(
+    gl,
+    gl.VERTEX_SHADER,
+    vertexString
+  );
+  //创建片元着色器
+  let fragmentShader = createShaderFromString(
+    gl,
+    gl.FRAGMENT_SHADER,
+    fragmentString
+  );
+
+  //创建着色器程序
+  let program = createProgram(gl, vertexShader, fragmentShader);
+  return program;
 }
 function createProgram(gl, vertexShader, fragmentShader) {
   let program = gl.createProgram();
