@@ -61,5 +61,7 @@
 	* [敬请期待]()
 * [深入探究：WebGL 实现天空盒]()
 	* [敬请期待]()
-* [初级入门：帧缓冲 : pages/lesson22.html](http://ifanqi.top/webgl/pages/lesson22.html)
+* [深入研究：帧缓冲 : pages/lesson22.html](http://ifanqi.top/webgl/pages/lesson22.html)
 	* [源码](https://github.com/lucefer/webgl/blob/master/pages/lesson22.html)
+* [深入探究：抖音特效实现 : pages/lesson23.html](http://ifanqi.top/webgl/pages/lesson23.html)
+	* [源码](https://github.com/lucefer/webgl/blob/master/pages/lesson23.html)
