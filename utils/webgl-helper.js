@@ -106,7 +106,6 @@ function createProgram(gl, vertexShader, fragmentShader) {
       uniformSetters: uniformSetters,
       attributeSetters: attributeSetters
     };
-    return program;
   }
   let errorLog = gl.getProgramInfoLog(program);
   gl.deleteProgram(program);
