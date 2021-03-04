@@ -79,9 +79,7 @@
         0
       ];
 
-      // 随机生成一个颜色。
-      var color = randomColor();
-      // 找到着色器中的全局变量 u_Color;
+      // 找到着色器中的全局变量 u_Texture;
       var u_Texture = gl.getUniformLocation(program, "u_Texture");
       var u_Screen_Size = gl.getUniformLocation(program, "u_Screen_Size");
       gl.uniform2f(u_Screen_Size, canvas.width, canvas.height);
